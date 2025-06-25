@@ -94,6 +94,10 @@
             opacity: 1;
             transform: scale(1);
         }
+        .nav-link.active {
+            background-color: #D6A354;
+            color: white;
+        }
     </style>
 </head>
 <body class="bg-stone-50 text-stone-800">
@@ -156,16 +160,19 @@
             </div>
 
             <div id="dashboard" class="content-section">
-                <h2 class="text-3xl font-bold text-stone-800 mb-8">My Dashboard</h2>
+                <div class="flex justify-between items-center mb-8">
+                     <h2 id="dashboard-greeting" class="text-3xl font-bold text-stone-800">My Dashboard</h2>
+                     <div id="dashboard-progress-summary" class="text-right"></div>
+                </div>
+
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2 space-y-8">
                         <div class="bg-white p-8 rounded-lg shadow-lg">
                             <h3 class="font-bold text-2xl mb-4 text-purple-600">My Definite Chief Aim</h3>
-                            <div id="dashboard-desire" class="text-stone-700 prose lg:prose-lg"></div>
+                            <div id="dashboard-desire" class="text-stone-700 prose lg:prose-lg max-w-none"></div>
                         </div>
-                         <div class="bg-gradient-to-r from-purple-600 to-blue-500 text-white p-8 rounded-lg shadow-lg">
-                            <h3 class="font-bold text-2xl mb-2">Focus for Today</h3>
-                            <div id="daily-focus" class="text-lg"></div>
+                         <div class="bg-gradient-to-r from-purple-600 to-blue-500 text-white p-8 rounded-lg shadow-lg cursor-pointer nav-button" id="daily-focus">
+                            <!-- Daily Focus Content here -->
                         </div>
                         <div class="bg-white p-8 rounded-lg shadow-lg">
                              <h3 class="font-bold text-2xl mb-4 text-purple-600">My Action Plan</h3>
@@ -175,7 +182,7 @@
                     <div class="bg-white p-8 rounded-lg shadow-lg">
                         <h3 class="font-bold text-2xl mb-4 text-purple-600">My Progress</h3>
                         <div class="chart-container" style="height: 250px; max-height: 250px;"><canvas id="progressChart"></canvas></div>
-                        <div id="dashboard-faith" class="mt-8 text-stone-700 prose"></div>
+                        <div id="dashboard-faith" class="mt-8 text-stone-700 prose max-w-none"></div>
                     </div>
                 </div>
             </div>
@@ -203,45 +210,13 @@
             
             <div id="workshop" class="content-section">
                 <div class="text-center mb-12">
-                     <h2 class="text-3xl font-bold text-stone-800">The Workshop: Master Your Mind</h2>
-                     <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">Success is an inside job. Before you can build a fortune, you must fortify your mind against the internal enemies that lead to failure: fear and indecision. Use these diagnostic tools to identify your personal obstacles and learn how to overcome them.</p>
+                     <h2 class="text-3xl font-bold text-stone-800">The Mindset Gymnasium</h2>
+                     <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">Success is an inside job. Fortify your mind against the internal enemies of failure with these mental workouts.</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                        <h3 class="text-2xl font-bold mb-4">Outwit the Six Ghosts of Fear</h3>
-                        <p class="mb-6">Fear is just a state of mind. Hill identified six basic fears that hold people back from success. Take this diagnostic to identify which "ghosts" are haunting you, and learn the principles to banish them for good.</p>
-                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-target="fear-diagnostic">Start Fear Diagnostic</button>
-                    </div>
-                    <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                        <h3 class="text-2xl font-bold mb-4">Banish the 57 Famous Alibis</h3>
-                        <p class="mb-6">"If I only had..." Alibis are the excuses we create to justify our lack of achievement. Recognizing them is the first step to eliminating them. Explore the list of 57 common alibis and discover how to stop making excuses and start making progress.</p>
-                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-target="alibi-buster">Explore the Alibis</button>
-                    </div>
+                <div id="workshop-tools" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Workshop tools will be injected here -->
                 </div>
             </div>
-
-            <div id="fear-diagnostic" class="content-section">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-stone-800">Fear Diagnostic</h2>
-                    <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">Answer the following questions honestly to reveal your "Fear Profile." There are no right or wrong answers; this is a tool for self-awareness.</p>
-                </div>
-                <div id="fear-quiz-container" class="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto"></div>
-                <div id="fear-results-container" class="hidden mt-8">
-                     <div class="chart-container bg-white p-4 rounded-lg shadow-lg">
-                        <canvas id="fearChart"></canvas>
-                    </div>
-                    <div id="fear-antidotes" class="mt-8 max-w-4xl mx-auto"></div>
-                </div>
-            </div>
-
-            <div id="alibi-buster" class="content-section">
-                 <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-stone-800">The 57 Famous Alibis</h2>
-                    <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">Alibis are fatal to success. Successful people have one thing in common: they are "alibi-less." Read through this list and be brutally honest with yourself. Which of these have you used? Click on an alibi to reveal the mindset shift required to overcome it.</p>
-                </div>
-                <div id="alibi-list" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg max-w-4xl mx-auto"></div>
-            </div>
-
         </main>
     </div>
 
@@ -721,10 +696,12 @@
                 }
 
 
-                faithDiv.innerHTML = userData.faithFormula ? `<strong>My Self-Confidence Formula:</strong><div class="mt-2 text-sm italic">${userData.faithFormula.replace(/\n/g, '<br>')}</div>` : '<p class="italic">Create your Self-Confidence Formula in the "Faith" module.</p>';
+                faithDiv.innerHTML = userData.faithFormula ? `<strong>My Self-Confidence Formula:</strong><div class="mt-2 text-sm">${userData.faithFormula.replace(/\n/g, '<br>')}</div>` : '<p class="italic">Create your Self-Confidence Formula in the "Faith" module.</p>';
                 
                 let randomPrinciple = appData.principles[Math.floor(Math.random()*appData.principles.length)];
                 focusDiv.innerHTML = `Principle #${appData.principles.indexOf(randomPrinciple)+1}: <strong>${randomPrinciple.name}</strong> - ${randomPrinciple.tagline}`;
+                focusDiv.setAttribute('data-target', `principles-${randomPrinciple.id}`);
+
 
                 let planHtml = '<p class="italic">No action plan created. Go to the "Organized Planning" module to start.</p>';
                 if(userData.actionPlan && userData.actionPlan.length > 0) {
@@ -766,6 +743,8 @@
                         }
                     }
                 });
+                 document.getElementById('dashboard-progress-summary').innerHTML = `<p class="text-xl font-bold">${completedCount} <span class="text-base font-normal text-stone-600">/ ${totalPrinciples} Principles Mastered</span></p>`;
+                 document.getElementById('dashboard-greeting').innerHTML = `Welcome, ${auth.currentUser.displayName.split(' ')[0]}`;
 
             }
             
@@ -854,20 +833,7 @@
             }
             
             function handleModify(principleId) {
-                const principleData = appData.content.find(p => p.id === principleId);
-                const practiceContainer = document.querySelector('#practice-content-area');
-                if (!principleData || !practiceContainer) return;
-
-                practiceContainer.innerHTML = principleData.practice.form;
-
-                if (principleId === 'faith') {
-                    const formulaTextarea = document.getElementById('faith-formula');
-                    if (formulaTextarea) {
-                        formulaTextarea.value = userData.faithFormula || '';
-                    }
-                    // Re-add the event listener to the new button
-                    practiceContainer.querySelector('[data-action="saveFaith"]').addEventListener('click', handleSaveFaithFormula);
-                }
+                renderPrincipleDetail(principleId, true); // Add a 'forceShowForm' flag
             }
 
             function openDesireModal() {
@@ -906,10 +872,11 @@
                     return;
                 }
                 
-                if (!userData.completedPrinciples.includes('desire')) {
-                     userData.completedPrinciples.push('desire');
+                const completed = userData.completedPrinciples ? [...userData.completedPrinciples] : [];
+                if (!completed.includes('desire')) {
+                     completed.push('desire');
                 }
-                await saveUserData({ desireData: desireData, desireStatement: null, completedPrinciples: userData.completedPrinciples });
+                await saveUserData({ desireData: desireData, desireStatement: null, completedPrinciples: completed });
                 renderDashboard();
                 
                 closeDesireModal();
@@ -924,10 +891,11 @@
                     return;
                 }
                 
-                if (!userData.completedPrinciples.includes('faith')) {
-                    userData.completedPrinciples.push('faith');
+                const completed = userData.completedPrinciples ? [...userData.completedPrinciples] : [];
+                if (!completed.includes('faith')) {
+                    completed.push('faith');
                 }
-                await saveUserData({ faithFormula: formulaText, completedPrinciples: userData.completedPrinciples });
+                await saveUserData({ faithFormula: formulaText, completedPrinciples: completed });
                 renderDashboard();
                 alert('Your Self-Confidence Formula has been saved!');
                 navigate('dashboard');
