@@ -210,12 +210,12 @@
                     <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                         <h3 class="text-2xl font-bold mb-4">Outwit the Six Ghosts of Fear</h3>
                         <p class="mb-6">Fear is just a state of mind. Hill identified six basic fears that hold people back from success. Take this diagnostic to identify which "ghosts" are haunting you, and learn the principles to banish them for good.</p>
-                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded-lg transition duration-300">Start Fear Diagnostic</button>
+                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-target="fear-diagnostic">Start Fear Diagnostic</button>
                     </div>
                     <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                         <h3 class="text-2xl font-bold mb-4">Banish the 57 Famous Alibis</h3>
                         <p class="mb-6">"If I only had..." Alibis are the excuses we create to justify our lack of achievement. Recognizing them is the first step to eliminating them. Explore the list of 57 common alibis and discover how to stop making excuses and start making progress.</p>
-                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded-lg transition duration-300">Explore the Alibis</button>
+                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-target="alibi-buster">Explore the Alibis</button>
                     </div>
                 </div>
             </div>
@@ -785,12 +785,26 @@
 
                 let practiceHtml = '';
                 if (principleData.practice) {
+                    
+                    let practiceContent = '';
+
+                    // Special handling for the 'desire' button
+                    if(principleId === 'desire' && userData?.desireStatement) {
+                         practiceContent = `<div class="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg">
+                            <p class="font-bold">Complete!</p>
+                            <p>You have defined your Definite Chief Aim. You can review it on your Dashboard.</p>
+                        </div>`;
+                    } else if (principleData.practice.buttonText) {
+                         practiceContent = `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}" data-principle="${principleId}">${principleData.practice.buttonText}</button>`;
+                    } else {
+                        practiceContent = principleData.practice.form || '';
+                    }
+
                     practiceHtml = `
                         <div class="mt-8 pt-6 border-t border-stone-200">
                             <h3 class="text-xl font-bold text-amber-500 mb-2">${principleData.practice.title}</h3>
                             <p class="text-stone-600 mb-4">${principleData.practice.description}</p>
-                            ${principleData.practice.buttonText ? `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}" data-principle="${principleId}">${principleData.practice.buttonText}</button>` : ''}
-                            ${principleData.practice.form ? principleData.practice.form : ''}
+                            ${practiceContent}
                         </div>
                     `;
                 }
