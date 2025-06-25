@@ -721,7 +721,7 @@
                 }
 
 
-                faithDiv.innerHTML = userData.faithFormula ? `<strong>My Self-Confidence Formula:</strong><div class="mt-2 text-sm italic">${userData.faithFormula.substring(0,150)}...</div>` : '<p class="italic">Create your Self-Confidence Formula in the "Faith" module.</p>';
+                faithDiv.innerHTML = userData.faithFormula ? `<strong>My Self-Confidence Formula:</strong><div class="mt-2 text-sm italic">${userData.faithFormula}</div>` : '<p class="italic">Create your Self-Confidence Formula in the "Faith" module.</p>';
                 
                 let randomPrinciple = appData.principles[Math.floor(Math.random()*appData.principles.length)];
                 focusDiv.innerHTML = `Principle #${appData.principles.indexOf(randomPrinciple)+1}: <strong>${randomPrinciple.name}</strong> - ${randomPrinciple.tagline}`;
@@ -800,10 +800,8 @@
                 let practiceHtml = '';
                 if (principleData.practice) {
                     let practiceContent = '';
-
-                    // Check if the practice for this principle has been completed
                     const isCompleted = userData?.completedPrinciples?.includes(principleId);
-
+                    
                     if (isCompleted && principleData.practice.form && !forceShowForm) {
                          practiceContent = `<div class="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg">
                             <p class="font-bold">Principle Mastered!</p>
@@ -822,7 +820,7 @@
                         <div class="mt-8 pt-6 border-t border-stone-200">
                             <h3 class="text-xl font-bold text-amber-500 mb-2">${principleData.practice.title}</h3>
                             <p class="text-stone-600 mb-4">${principleData.practice.description}</p>
-                            ${practiceContent}
+                            <div id="practice-content-area">${practiceContent}</div>
                         </div>
                     `;
                 }
@@ -846,9 +844,8 @@
                     renderActionPlan();
                     renderLeadershipSliders();
                 }
-
-                // Pre-fill faith formula if it's the initial render or modify render of the form
-                if(principleId === 'faith' && (forceShowForm || !isCompleted)) {
+                
+                if(principleId === 'faith') {
                     const faithTextarea = document.getElementById('faith-formula');
                     if(faithTextarea) {
                         faithTextarea.value = userData.faithFormula || '';
@@ -857,7 +854,19 @@
             }
             
             function handleModify(principleId) {
-                renderPrincipleDetail(principleId, true); // Add a 'forceShowForm' flag
+                const principleData = appData.content.find(p => p.id === principleId);
+                const practiceContainer = document.querySelector('#practice-content-area');
+                if (!principleData || !practiceContainer) return;
+
+                practiceContainer.innerHTML = principleData.practice.form;
+
+                if (principleId === 'faith') {
+                    const formulaTextarea = document.getElementById('faith-formula');
+                    if (formulaTextarea) {
+                        formulaTextarea.value = userData.faithFormula || '';
+                    }
+                    practiceContainer.querySelector('[data-action="saveFaith"]').addEventListener('click', handleSaveFaithFormula);
+                }
             }
 
             function openDesireModal() {
