@@ -865,6 +865,8 @@
                     if (formulaTextarea) {
                         formulaTextarea.value = userData.faithFormula || '';
                     }
+                    // Re-add the event listener to the new button
+                    practiceContainer.querySelector('[data-action="saveFaith"]').addEventListener('click', handleSaveFaithFormula);
                 }
             }
 
@@ -904,11 +906,10 @@
                     return;
                 }
                 
-                const completed = userData.completedPrinciples ? [...userData.completedPrinciples] : [];
-                if (!completed.includes('desire')) {
-                     completed.push('desire');
+                if (!userData.completedPrinciples.includes('desire')) {
+                     userData.completedPrinciples.push('desire');
                 }
-                await saveUserData({ desireData: desireData, desireStatement: null, completedPrinciples: completed });
+                await saveUserData({ desireData: desireData, desireStatement: null, completedPrinciples: userData.completedPrinciples });
                 renderDashboard();
                 
                 closeDesireModal();
@@ -923,11 +924,10 @@
                     return;
                 }
                 
-                const completed = userData.completedPrinciples ? [...userData.completedPrinciples] : [];
-                if (!completed.includes('faith')) {
-                    completed.push('faith');
+                if (!userData.completedPrinciples.includes('faith')) {
+                    userData.completedPrinciples.push('faith');
                 }
-                await saveUserData({ faithFormula: formulaText, completedPrinciples: completed });
+                await saveUserData({ faithFormula: formulaText, completedPrinciples: userData.completedPrinciples });
                 renderDashboard();
                 alert('Your Self-Confidence Formula has been saved!');
                 navigate('dashboard');
