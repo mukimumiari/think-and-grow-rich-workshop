@@ -268,7 +268,7 @@
             </div>
             <div class="flex justify-end gap-4 mt-6">
                 <button type="button" id="close-desire-modal" class="px-4 py-2 bg-stone-200 text-stone-800 rounded-lg hover:bg-stone-300">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600">Create My Statement</button>
+                <button type="submit" class="px-4 py-2 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600">Save Statement</button>
             </div>
         </form>
     </div>
@@ -467,7 +467,7 @@
                         summary: `The "Sixth Sense" is that portion of the subconscious mind which has been referred to as the Creative Imagination. It is the faculty that connects you to Infinite Intelligence. This principle is the apex of the philosophy and can be assimilated and applied only after you have mastered the other twelve principles. Through the sixth sense, you will be warned of impending dangers and notified of opportunities. It is the "guardian angel" that opens the door to the temple of wisdom. Hill describes his method of using his "Invisible Counselors"—an imaginary council of great minds like Lincoln, Emerson, and Edison—as a technique for deliberately engaging this faculty and seeking higher wisdom when faced with a problem. <blockquote>"The Sixth Sense is not something that one can take off and put on at will. Ability to use this great power comes slowly, through application of the other twelve principles."</blockquote>`,
                          practice: {
                             title: "Practice: Intuition Log & Invisible Council",
-                            description: "The Sixth Sense often speaks in 'hunches.' Keep a log of these intuitive feelings. Then, try the Invisible Counselor exercise.",
+                            description: "The Sixth Sense often speaks in 'hunches.' Keep a log of these intuitive feelings. Don't judge them, just record them. Over time, you will learn to trust this faculty.",
                              form: `
                                 <label class="block text-sm font-medium text-stone-700">Log a hunch or sudden idea:</label>
                                 <textarea class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="3" placeholder="Today I had a hunch about..."></textarea>
@@ -713,7 +713,10 @@
                         <p class="mb-4">In return for this money I will give the most efficient service of which I am capable, rendering the fullest possible quantity, and the best possible quality of service in the form of: <strong>${give}</strong>.</p>
                         <p>My plan is as follows: <strong>${plan}</strong></p>
                     `;
-                } else {
+                } else if (userData.desireStatement) { // Backward compatibility for old format
+                    desireDiv.innerHTML = userData.desireStatement;
+                }
+                else {
                     desireDiv.innerHTML = '<p class="italic">Define your Definite Chief Aim in the "Desire" module.</p>';
                 }
 
@@ -800,7 +803,8 @@
 
                     // Special handling for the 'desire' button
                     if (principleId === 'desire') {
-                        const buttonText = userData?.desireData ? "Modify My Desire" : "Define My Desire";
+                        const hasDesire = userData?.desireData || userData?.desireStatement;
+                        const buttonText = hasDesire ? "Modify My Desire" : "Define My Desire";
                         practiceContent = `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="openDesireModal" data-principle="${principleId}">${buttonText}</button>`;
                     } else if (principleData.practice.buttonText) {
                          practiceContent = `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}" data-principle="${principleId}">${principleData.practice.buttonText}</button>`;
@@ -874,7 +878,7 @@
                 }
                 
                 await markPrincipleComplete('desire');
-                await saveUserData({ desireData: desireData });
+                await saveUserData({ desireData: desireData, desireStatement: null }); // Save new format, nullify old one
                 renderDashboard();
                 
                 closeDesireModal();
