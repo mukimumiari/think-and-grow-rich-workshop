@@ -33,6 +33,11 @@
             color: #ffffff;
             font-weight: 600;
         }
+        .sidebar-link.locked {
+            color: #a8a29e;
+            cursor: not-allowed;
+            background-color: #f5f5f4;
+        }
         .modal-backdrop {
             display: none;
             position: fixed;
@@ -73,6 +78,11 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
+        }
+        .principle-card.locked {
+            filter: grayscale(80%);
+            opacity: 0.6;
+            cursor: not-allowed;
         }
         .principle-card .completion-check {
             position: absolute;
@@ -167,12 +177,12 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2 space-y-8">
+                         <div class="bg-gradient-to-r from-purple-600 to-blue-500 text-white p-8 rounded-lg shadow-lg" id="next-step-card">
+                            <!-- Next Step Content here -->
+                        </div>
                         <div class="bg-white p-8 rounded-lg shadow-lg">
                             <h3 class="font-bold text-2xl mb-4 text-purple-600">My Definite Chief Aim</h3>
                             <div id="dashboard-desire" class="text-stone-700 prose lg:prose-lg max-w-none"></div>
-                        </div>
-                         <div class="bg-gradient-to-r from-purple-600 to-blue-500 text-white p-8 rounded-lg shadow-lg cursor-pointer nav-button" id="daily-focus">
-                            <!-- Daily Focus Content here -->
                         </div>
                         <div class="bg-white p-8 rounded-lg shadow-lg">
                              <h3 class="font-bold text-2xl mb-4 text-purple-600">My Action Plan</h3>
@@ -658,9 +668,9 @@
                 }
 
                 document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('bg-amber-400', 'text-white');
+                    link.classList.remove('active');
                 });
-                 document.querySelector(`.nav-link[data-target="${targetId}"]`)?.classList.add('bg-amber-400', 'text-white');
+                 document.querySelector(`.nav-link[data-target="${targetId}"]`)?.classList.add('active');
 
                 if (targetId.startsWith('principles-') && targetId !== 'principles-hub') {
                     document.getElementById('principles-detail-view').classList.add('active');
