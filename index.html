@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Think and Grow Rich: Interactive Workshop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        h1, h2, h3, h4, .font-serif {
+            font-family: 'Lora', serif;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .sidebar-link.active {
+            background-color: #FBBF24;
+            color: #44403C;
+            font-weight: 600;
+        }
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800">
+    <!-- Chosen Palette: Warm Harmony -->
+    <!-- Application Structure Plan: A guided journey structure is used. The app is divided into four main sections accessible via a top navigation: Home, The 13 Principles, The Workshop (for self-analysis), and My Blueprint (a summary of user inputs). This structure logically separates the core philosophy from practical application tools, guiding the user from learning to doing. The 13 Principles section uses a sidebar for sub-navigation, allowing users to either follow the sequence or jump to a specific concept. This promotes both structured learning and flexible exploration, making the dense material more digestible and user-friendly. -->
+    <!-- Visualization & Content Choices: 1. **Principles Overview**: Goal: Organize. Method: Interactive card grid. Interaction: Click to navigate. Justification: Visual, scannable entry points to complex topics. 2. **Desire Formula**: Goal: Practice. Method: Modal form. Interaction: User input generates formatted text. Justification: Turns a core book exercise into an actionable tool. 3. **Fear Diagnostic**: Goal: Diagnose/Compare. Method: Quiz feeding a Bar Chart (Chart.js). Interaction: User answers questions, chart visualizes scores. Justification: A bar chart provides an immediate, clear comparison of the user's "fears," making the abstract concept personal and measurable. 4. **Alibis List**: Goal: Organize/Inform. Method: Interactive accordion. Interaction: Click to reveal content. Justification: Manages a long list of text items, preventing cognitive overload. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <div id="app" class="min-h-screen flex flex-col">
+        <header class="bg-white shadow-md sticky top-0 z-30">
+            <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-stone-700">Think & Grow Rich</h1>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-target="home">Home</a>
+                            <a href="#" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-target="principles-hub">The 13 Principles</a>
+                            <a href="#" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-target="workshop">The Workshop</a>
+                            <a href="#" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-target="blueprint">My Blueprint</a>
+                        </div>
+                    </div>
+                    <div class="md:hidden">
+                        <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-stone-600 hover:text-stone-800 hover:bg-stone-200 focus:outline-none">
+                            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-target="home">Home</a>
+                    <a href="#" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-target="principles-hub">The 13 Principles</a>
+                    <a href="#" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-target="workshop">The Workshop</a>
+                    <a href="#" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-target="blueprint">My Blueprint</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
+            <div id="home" class="content-section">
+                <div class="text-center bg-white p-8 rounded-lg shadow-lg">
+                    <h2 class="text-4xl font-bold text-stone-800 mb-4">"Whatever the Mind Can Conceive and Believe, It Can Achieve."</h2>
+                    <p class="text-lg text-stone-600 max-w-3xl mx-auto mb-6">Welcome to the interactive workshop for Napoleon Hill's timeless classic, *Think and Grow Rich*. This is not just a book to be read; it's a philosophy to be lived. This digital experience is designed to help you move beyond passive reading into active practice. Here, you will find tools and exercises to help you define your desires, build unshakeable faith, and create actionable plans to transform your dreams into reality.</p>
+                    <p class="text-lg text-stone-600 max-w-3xl mx-auto mb-8">Begin your journey by exploring the 13 Principles, diagnose your mental obstacles in The Workshop, and build your personal success plan in My Blueprint. Your journey to riches—in wealth, happiness, and spiritual satisfaction—starts now.</p>
+                    <button class="nav-button bg-amber-400 hover:bg-amber-500 text-stone-800 font-bold py-3 px-8 rounded-lg text-lg transition duration-300" data-target="principles-hub">Start the Journey: Explore the 13 Principles</button>
+                </div>
+            </div>
+
+            <div id="principles-hub" class="content-section">
+                <div class="text-center mb-12">
+                     <h2 class="text-3xl font-bold text-stone-800">The 13 Principles of Achievement</h2>
+                     <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">This is the core of Napoleon Hill's philosophy. Each principle is a step toward mastering your mind and directing it towards the attainment of your goals. Explore each principle to understand its meaning and engage with the interactive exercises to apply it to your own life. Click on a card to begin.</p>
+                </div>
+                <div id="principles-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                </div>
+            </div>
+            
+            <div id="principles-detail-view" class="content-section">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <aside class="w-full lg:w-1/4 xl:w-1/5">
+                        <h3 class="text-xl font-bold mb-4">The 13 Principles</h3>
+                        <nav id="principles-sidebar" class="space-y-2">
+                        </nav>
+                    </aside>
+                    <div id="principle-content-area" class="w-full lg:w-3/4 xl:w-4/5 bg-white p-6 sm:p-8 rounded-lg shadow-lg">
+                    </div>
+                </div>
+            </div>
+            
+            <div id="workshop" class="content-section">
+                <div class="text-center mb-12">
+                     <h2 class="text-3xl font-bold text-stone-800">The Workshop: Master Your Mind</h2>
+                     <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">Success is an inside job. Before you can build a fortune, you must fortify your mind against the internal enemies that lead to failure: fear and indecision. Use these diagnostic tools to identify your personal obstacles and learn how to overcome them.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4">Outwit the Six Ghosts of Fear</h3>
+                        <p class="mb-6">Fear is just a state of mind. Hill identified six basic fears that hold people back from success. Take this diagnostic to identify which "ghosts" are haunting you, and learn the principles to banish them for good.</p>
+                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-stone-800 font-bold py-2 px-6 rounded-lg transition duration-300" data-target="fear-diagnostic">Start Fear Diagnostic</button>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4">Banish the 57 Alibis</h3>
+                        <p class="mb-6">"If I only had..." Alibis are the excuses we create to justify our lack of achievement. Recognizing them is the first step to eliminating them. Explore the list of 57 common alibis and discover how to stop making excuses and start making progress.</p>
+                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-stone-800 font-bold py-2 px-6 rounded-lg transition duration-300" data-target="alibi-buster">Explore the Alibis</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="fear-diagnostic" class="content-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-stone-800">Fear Diagnostic</h2>
+                    <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">Answer the following questions honestly to reveal your "Fear Profile." There are no right or wrong answers; this is a tool for self-awareness.</p>
+                </div>
+                <div id="fear-quiz-container" class="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto"></div>
+                <div id="fear-results-container" class="hidden mt-8">
+                     <div class="chart-container bg-white p-4 rounded-lg shadow-lg">
+                        <canvas id="fearChart"></canvas>
+                    </div>
+                    <div id="fear-antidotes" class="mt-8 max-w-4xl mx-auto"></div>
+                </div>
+            </div>
+
+            <div id="alibi-buster" class="content-section">
+                 <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-stone-800">The 57 Famous Alibis</h2>
+                    <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">Alibis are fatal to success. Successful people have one thing in common: they are "alibi-less." Read through this list and be brutally honest with yourself. Which of these have you used? Click on an alibi to reveal the mindset shift required to overcome it.</p>
+                </div>
+                <div id="alibi-list" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg max-w-4xl mx-auto"></div>
+            </div>
+
+            <div id="blueprint" class="content-section">
+                 <div class="text-center mb-12">
+                     <h2 class="text-3xl font-bold text-stone-800">My Personal Success Blueprint</h2>
+                     <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">This is your personal headquarters for achievement. All the work you do throughout this interactive workshop will be summarized here. Revisit this page daily to keep your goals top-of-mind and track your progress.</p>
+                </div>
+                <div class="space-y-8 max-w-4xl mx-auto">
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h3 class="font-bold text-2xl mb-4 text-amber-600">My Definite Chief Aim</h3>
+                        <div id="blueprint-desire" class="text-stone-700 prose lg:prose-lg">
+                            <p class="italic">You have not yet defined your Desire. Complete the exercise in the "Desire" principle to see it here.</p>
+                        </div>
+                    </div>
+                     <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h3 class="font-bold text-2xl mb-4 text-amber-600">My Self-Confidence Formula</h3>
+                        <div id="blueprint-faith" class="text-stone-700 prose lg:prose-lg">
+                             <p class="italic">You have not yet defined your Self-Confidence Formula. Complete the exercise in the "Faith" principle to see it here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="desire-modal-backdrop" class="modal-backdrop"></div>
+    <div id="desire-modal" class="modal bg-white rounded-lg shadow-2xl p-8 max-w-lg w-full">
+        <h3 class="text-2xl font-bold mb-4">The Six Steps to Riches</h3>
+        <p class="text-sm text-stone-600 mb-6">Follow this formula to transmute your desire for riches into its financial equivalent. Be specific and be bold.</p>
+        <form id="desire-form">
+            <div class="mb-4">
+                <label for="desire-amount" class="block text-sm font-medium text-stone-700">1. The exact amount of money I desire is:</label>
+                <input type="text" id="desire-amount" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-amber-400 focus:ring focus:ring-amber-300 focus:ring-opacity-50" placeholder="$1,000,000">
+            </div>
+            <div class="mb-4">
+                <label for="desire-give" class="block text-sm font-medium text-stone-700">2. What I intend to give in return:</label>
+                <textarea id="desire-give" rows="3" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-amber-400 focus:ring focus:ring-amber-300 focus:ring-opacity-50" placeholder="My full effort in building the most innovative marketing agency..."></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="desire-date" class="block text-sm font-medium text-stone-700">3. A definite date for its acquisition:</label>
+                <input type="date" id="desire-date" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-amber-400 focus:ring focus:ring-amber-300 focus:ring-opacity-50">
+            </div>
+            <div class="mb-4">
+                <label for="desire-plan" class="block text-sm font-medium text-stone-700">4. My clear, definite plan to achieve it:</label>
+                <textarea id="desire-plan" rows="4" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-amber-400 focus:ring focus:ring-amber-300 focus:ring-opacity-50" placeholder="First, I will... Second, I will..."></textarea>
+            </div>
+            <div class="flex justify-end gap-4 mt-6">
+                <button type="button" id="close-desire-modal" class="px-4 py-2 bg-stone-200 text-stone-800 rounded-lg hover:bg-stone-300">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-amber-400 text-stone-800 font-bold rounded-lg hover:bg-amber-500">Create My Statement</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const appData = {
+                principles: [
+                    { id: 'desire', name: 'Desire', tagline: 'The Turning Point of All Achievement' },
+                    { id: 'faith', name: 'Faith', tagline: 'Visualizing and Believing in Attainment' },
+                    { id: 'auto-suggestion', name: 'Auto-Suggestion', tagline: 'Influencing the Subconscious Mind' },
+                    { id: 'specialized-knowledge', name: 'Specialized Knowledge', tagline: 'Personal Experiences or Observations' },
+                    { id: 'imagination', name: 'Imagination', tagline: 'The Workshop of the Mind' },
+                    { id: 'organized-planning', name: 'Organized Planning', tagline: 'Crystallization of Desire into Action' },
+                    { id: 'decision', name: 'Decision', tagline: 'The Mastery of Procrastination' },
+                    { id: 'persistence', name: 'Persistence', tagline: 'The Sustained Effort to Induce Faith' },
+                    { id: 'master-mind', name: 'Power of the Master Mind', tagline: 'The Driving Force' },
+                    { id: 'sex-transmutation', name: 'Sex Transmutation', tagline: 'The Mystery of Converting Energy' },
+                    { id: 'subconscious-mind', name: 'The Subconscious Mind', tagline: 'The Connecting Link' },
+                    { id: 'brain', name: 'The Brain', tagline: 'A Broadcasting and Receiving Station' },
+                    { id: 'sixth-sense', name: 'The Sixth Sense', tagline: 'The Door to the Temple of Wisdom' }
+                ],
+                content: [
+                    {
+                        id: 'desire',
+                        title: 'Desire: The Turning Point of All Achievement',
+                        summary: `Every great achievement starts with a burning desire, not a mere wish or a hope. It's a definite, all-consuming obsession that you must cultivate. The story of Edwin C. Barnes, who "thought" his way into a partnership with Thomas Edison, perfectly illustrates this. He arrived at Edison's lab a penniless "tramp," but in his mind, he was already Edison's partner. His burning desire was the one asset he possessed, and it was enough. To harness this principle, you must transform your vague wants into a clear, definite purpose and back it with persistence until it becomes a reality.`,
+                        practice: {
+                            title: "Practice: The Six-Step Formula",
+                            description: "Napoleon Hill provides a practical, six-step method for transmuting desire into its financial equivalent. This is not a magic trick; it's a psychological tool to crystallize your goal and burn it into your subconscious mind. Click the button below to begin this foundational exercise.",
+                            buttonText: "Define My Desire",
+                            action: 'openDesireModal'
+                        }
+                    },
+                    {
+                        id: 'faith',
+                        title: 'Faith: Visualizing and Believing in Attainment',
+                        summary: `Faith is a state of mind that you can cultivate through auto-suggestion. It is the "head chemist" of the mind, which, when blended with thought, connects you with Infinite Intelligence. Faith is the basis of all "miracles" and mysteries that cannot be analyzed by the rules of science. It's the vital element that gives power and life to your desire. You must act as if you already possess what you desire, and your subconscious mind will hand over a practical plan for acquiring it.`,
+                        practice: {
+                            title: "Practice: The Self-Confidence Formula",
+                            description: "To build faith, you must impress your subconscious mind with positive affirmations. Hill provides a five-step Self-Confidence Formula. Write out your own version of this formula below. Read it aloud once daily, and over time, it will develop in you the self-confidence to achieve any object.",
+                            form: `
+                                <textarea id="faith-formula" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-amber-400 focus:ring focus:ring-amber-300 focus:ring-opacity-50" rows="8" placeholder="1. I know that I have the ability to achieve the object of my Definite Purpose in life... \n2. I realize the dominating thoughts of my mind will eventually reproduce themselves in outward, physical action...\n3. I know through the principle of auto-suggestion, any desire that I persistently hold in my mind will eventually seek expression... \n4. I have clearly written down a description of my definite chief aim in life...\n5. I fully realize that no wealth or position can long endure, unless built upon truth and justice..."></textarea>
+                                <button id="save-faith-formula" class="action-button mt-4 px-6 py-2 bg-amber-400 text-stone-800 font-bold rounded-lg hover:bg-amber-500" data-action="saveFaith">Save to My Blueprint</button>
+                            `
+                        }
+                    },
+                    {
+                        id: 'auto-suggestion',
+                        title: 'Auto-Suggestion: Influencing the Subconscious Mind',
+                        summary: "Auto-suggestion is the control panel to your subconscious mind. It's the agency of communication between the conscious mind and the subconscious. Your subconscious mind is like a fertile garden; it will grow whatever seeds you plant, whether they are seeds of success or weeds of failure. Crucially, the subconscious only acts on thoughts that are mixed with emotion or feeling. Plain words have no effect. This is why you must read your written desire statement aloud daily, with feeling and emotion, seeing and feeling yourself already in possession of your goal.",
+                         practice: {
+                            title: "Practice: The Visualization Vault",
+                            description: "Your subconscious mind responds to emotion. Create a 'mental movie' of your success. In the space below, describe in vivid, emotional detail what it feels like to have already achieved your Definite Chief Aim. What do you see? What do you hear? Who is congratulating you? Feel the pride and joy. Read this daily to fuel your faith.",
+                            form: `
+                                <textarea id="visualization-journal" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-amber-400 focus:ring focus:ring-amber-300 focus:ring-opacity-50" rows="8" placeholder="In my mind's eye, I see myself... I am filled with a feeling of..."></textarea>
+                                <p class="text-sm mt-2 text-stone-500">This entry is for your personal practice and is not saved.</p>
+                            `
+                        }
+                    },
+                    {
+                        id: 'specialized-knowledge',
+                        title: 'Specialized Knowledge: Personal Experiences or Observations',
+                        summary: `General knowledge, no matter how great in quantity or variety, is of little use in accumulating money. Fortunes are created through specialized knowledge. This doesn't mean you must possess this knowledge yourself. Henry Ford was famously 'ignorant' of many technical details but surrounded himself with a Master Mind group who had the knowledge. Successful people never stop acquiring specialized knowledge related to their purpose, business, or profession. True education is about knowing where to acquire the knowledge you need and how to organize it into a definite plan of action.`,
+                        practice: {
+                            title: "Practice: Knowledge Gap Analysis",
+                            description: "Identify the specific knowledge you need to achieve your goal. Then, create a plan to acquire it.",
+                             form: `
+                                <label class="block text-sm font-medium text-stone-700">1. What specific skills or knowledge do I need for my goal?</label>
+                                <textarea class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="3" placeholder="e.g., Digital marketing, public speaking, coding..."></textarea>
+                                <label class="block text-sm font-medium text-stone-700 mt-4">2. How will I acquire this knowledge? (Courses, books, mentors)</label>
+                                <textarea class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="3" placeholder="e.g., Take a course on Coursera, read 3 books on sales, find a mentor..."></textarea>
+                            `
+                        }
+                    },
+                    {
+                        id: 'imagination',
+                        title: 'Imagination: The Workshop of the Mind',
+                        summary: `The imagination is the workshop where all plans are created. Hill identifies two forms: Synthetic Imagination, which rearranges old concepts, ideas, or plans into new combinations; and Creative Imagination, which connects with Infinite Intelligence and is the source of "hunches" and inspiration. The story of Coca-Cola's "secret ingredient" is a testament to imagination; the real secret was Asa Candler's idea to mass-market the formula. Your desire is given shape and form through the aid of your imagination.`,
+                        practice: {
+                            title: "Practice: Idea Sandbox",
+                            description: "Exercise your imagination. Given your Definite Chief Aim, what is one new service or method you could create (Synthetic Imagination)? What is one 'impossible' idea that, if it worked, would change everything (Creative Imagination)?",
+                            form: `
+                                <textarea class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="5" placeholder="Let your mind run free. Don't censor any ideas..."></textarea>
+                            `
+                        }
+                    },
+                    {
+                        id: 'organized-planning',
+                        title: 'Organized Planning: The Crystallization of Desire into Action',
+                        summary: "You must create practical, definite plans for achieving your desire. It's crucial to ally yourself with a 'Master Mind' group of people who have the knowledge and experience you need. Remember, no plan is perfect. When a plan fails, it's a temporary defeat, not a permanent failure. Replace it with a new plan. A quitter never wins, and a winner never quits. Most great leaders began as intelligent followers. Before you can lead, you must demonstrate you can follow.",
+                        practice: {
+                            title: "Practice: Action Plan Builder",
+                            description: "Break down your goal into small, actionable steps. What is the very first thing you can do, right now or within 24 hours?",
+                            form: `
+                                <label class="block text-sm font-medium text-stone-700">My first milestone:</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" placeholder="e.g., Draft the business plan outline">
+                                <label class="block text-sm font-medium text-stone-700 mt-4">My second milestone:</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" placeholder="e.g., Research top 3 competitors">
+                             `
+                        }
+                    },
+                    {
+                        id: 'decision',
+                        title: 'Decision: The Mastery of Procrastination',
+                        summary: 'Lack of decision is a top cause of failure. People who succeed have the habit of reaching decisions promptly and of changing these decisions slowly, if and when they are changed. The majority of people who fail are easily influenced by the opinions of others. Keep your own counsel. The world has the habit of making room for the person whose words and actions show they know where they are going. The 56 men who signed the Declaration of Independence made a monumental decision that could have cost them their lives, and in doing so, they birthed a nation.',
+                        practice: {
+                            title: "Practice: Decision-Making Sprint",
+                            description: "Procrastination is the enemy of success. Identify one decision you have been putting off. Make it now. Write it down to make it real.",
+                            form: `
+                                <label class="block text-sm font-medium text-stone-700">The decision I have been avoiding is:</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" placeholder="e.g., Whether to start the new project, who to hire...">
+                                <label class="block text-sm font-medium text-stone-700 mt-4">My decision is:</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" placeholder="I will...">
+                            `
+                        }
+                    },
+                    {
+                        id: 'persistence',
+                        title: 'Persistence: The Sustained Effort to Induce Faith',
+                        summary: 'Persistence is to character what carbon is to steel. It is the sustained effort necessary to induce faith. The basis of persistence is will-power. When combined with desire, it forms an irresistible force. Most people are ready to throw their goals and aims overboard at the first sign of opposition. A few carry on despite all opposition, until they attain their goal. There may be no heroic connotation to the word "persistence," but the quality is to the character of man what carbon is to steel.',
+                        practice: {
+                            title: "Practice: Persistence Log",
+                            description: "Every failure brings with it the seed of an equivalent advantage. Think of a recent 'temporary defeat.' What was the hidden lesson or opportunity? How can you apply it?",
+                            form: `<textarea class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="5" placeholder="The setback was... The lesson learned was... My next step is..."></textarea>`
+                        }
+                    },
+                    {
+                        id: 'master-mind',
+                        title: 'Power of the Master Mind: The Driving Force',
+                        summary: 'The "Master Mind" is the coordination of knowledge and effort, in a spirit of harmony, between two or more people, for the attainment of a definite purpose. No individual may have great power without availing himself of the Master Mind. Andrew Carnegie\'s success was not due to his own knowledge of the steel business, but to his Master Mind group of fifty specialists. Power is required for the accumulation of money, and it is created through organized and intelligently directed knowledge.',
+                         practice: {
+                            title: "Practice: Master Mind Architect",
+                            description: "Who are the people who can provide the knowledge or support you lack? What can you offer them in return? Plan your alliance.",
+                             form: `
+                                <label class="block text-sm font-medium text-stone-700">Potential Member 1 (and what I can offer them):</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" placeholder="e.g., John Smith (financial expertise). I can offer marketing advice.">
+                                <label class="block text-sm font-medium text-stone-700 mt-4">Potential Member 2 (and what I can offer them):</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" placeholder="e.g., Jane Doe (legal counsel). I can offer web design services.">
+                            `
+                        }
+                    },
+                    {
+                        id: 'sex-transmutation',
+                        title: 'The Mystery of Sex Transmutation',
+                        summary: "Sex transmutation means the switching of the mind from thoughts of physical expression to thoughts of some other nature. The desire for sexual expression is the most powerful of human desires. When this energy is harnessed and redirected into other channels, it maintains all of its attributes of keenness of imagination, courage, and creative ability. This is a principle of sublimation, not suppression. The most successful people are those with highly developed sex natures who have learned the art of transmuting this powerful energy into creative or business pursuits.",
+                         practice: {
+                            title: "Practice: Passion to Project",
+                            description: "What are you truly passionate about in life? How can you channel the energy and enthusiasm from that passion into your Definite Chief Aim?",
+                             form: `<textarea class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="5" placeholder="My passion is... I can bring that energy to my work by..."></textarea>`
+                        }
+                    },
+                    {
+                        id: 'subconscious-mind',
+                        title: 'The Subconscious Mind: The Connecting Link',
+                        summary: 'The subconscious mind is a field of consciousness in which every impulse of thought that reaches the objective mind through any of the five senses is classified and recorded. It is the connecting link to Infinite Intelligence. You cannot entirely control your subconscious mind, but you can voluntarily hand over to it any plan, desire, or purpose which you wish transformed into concrete form. It works day and night. You must guard it against the negative emotions of fear, jealousy, hatred, and greed, and feed it with positive, emotionalized thoughts of desire and faith.',
+                         practice: {
+                            title: "Practice: Positive Emotion Focus",
+                            description: "The subconscious responds to emotion. Pick one of the seven major positive emotions (Desire, Faith, Love, Enthusiasm, Romance, Hope) and focus on cultivating it today. How can you embody this emotion in your actions?",
+                             form: `<textarea class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="5" placeholder="Today I will focus on ENTHUSIASM. I will bring it to my team meeting by..."></textarea>`
+                        }
+                    },
+                    {
+                        id: 'brain',
+                        title: 'The Brain: A Broadcasting and Receiving Station for Thought',
+                        summary: 'The human brain is both a broadcasting and a receiving station for the vibration of thought. Through the ether, in a fashion similar to radio, every human brain is capable of picking up the vibrations of thought which are being released by other brains. Your mental state is crucial. When you attune your mind to a high rate of vibration (through positive emotions like faith and desire), you are more receptive to thoughts from Infinite Intelligence and from the minds of others in your Master Mind group.',
+                         practice: {
+                            title: "Practice: Mental Environment Audit",
+                            description: "Your brain 'tunes in' to your surroundings. What is one negative influence (a person, media source, etc.) you can reduce this week? What is one positive influence you can increase?",
+                             form: `
+                                <label class="block text-sm font-medium text-stone-700">I will reduce/eliminate:</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" placeholder="e.g., Complaining with a coworker">
+                                <label class="block text-sm font-medium text-stone-700 mt-4">I will increase/add:</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" placeholder="e.g., Listening to an inspiring podcast daily">
+                            `
+                        }
+                    },
+                    {
+                        id: 'sixth-sense',
+                        title: 'The Sixth Sense: The Door to the Temple of Wisdom',
+                        summary: `The "Sixth Sense" is that portion of the subconscious mind which has been referred to as the Creative Imagination. It is the faculty that connects you to Infinite Intelligence. This principle is the apex of the philosophy and can be assimilated and applied only after you have mastered the other twelve principles. Through the sixth sense, you will be warned of impending dangers in time to avoid them, and notified of opportunities in time to embrace them. It is the "guardian angel" that opens the door to the temple of wisdom.`,
+                         practice: {
+                            title: "Practice: Intuition Log",
+                            description: "The Sixth Sense often speaks in 'hunches' or 'inspirations.' Keep a log of these intuitive feelings. Don't judge them, just record them. Over time, you will learn to trust this faculty.",
+                             form: `<textarea class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="5" placeholder="Today I had a hunch about... A sudden idea came to me to..."></textarea>`
+                        }
+                    }
+                ],
+                fearQuiz: [
+                    { q: "Do you often put things off, creating alibis and excuses for why you haven't done them?", fear: "Poverty" },
+                    { q: "Do you find it difficult to make decisions, often worrying you'll make the wrong one?", fear: "Poverty" },
+                    { q: "Do you hesitate to express your opinions for fear of what others might say or think?", fear: "Criticism" },
+                    { q: "Do you often check what others are wearing or doing to make sure you fit in?", fear: "Criticism" },
+                    { q: "Do you worry excessively about minor physical symptoms?", fear: "Ill Health" },
+                    { q: "Do you find yourself talking about sickness, operations, or other health problems?", fear: "Ill Health" },
+                    { q: "Do you feel extreme jealousy or suspicion towards people you love without concrete cause?", fear: "Loss of Love" },
+                    { q: "Do you gamble, steal, or take risky chances to 'win' affection or money?", fear: "Loss of Love" },
+                    { q: "Do you apologize for your age, either by saying you're 'too old' or 'too young'?", fear: "Old Age" },
+                    { q: "Do you have a habit of slowing down and developing an inferiority complex as you get older?", fear: "Old Age" },
+                    { q: "Do you have a deep-seated worry about what might come after life?", fear: "Death" },
+                    { q: "Does the thought of death prevent you from enjoying life or pursuing a worthy purpose?", fear: "Death" }
+                ],
+                alibis: [
+                    { alibi: "IF I didn't have a wife and family...", antidote: "This is a profound contradiction. Your family should be your primary motivation, not your excuse. Reframe this: 'BECAUSE I have a wife and family, I MUST achieve my goals.'" },
+                    { alibi: "IF I had enough 'pull'...", antidote: "'Pull' is an illusion. True power comes from applied specialized knowledge and persistence. Focus on what you can control: your own skills and effort." },
+                    { alibi: "IF I had money...", antidote: "This is the most common alibi. Barnes had no money, only desire. Desire, when crystallized into a plan, is the tool that attracts money." },
+                    { alibi: "IF I had a good education...", antidote: "Henry Ford had little formal education. True education is about applied knowledge, not degrees. Identify what you need to know and create a plan to learn it." },
+                    { alibi: "IF I could get a job...", antidote: "Focus on what you can give. The world pays for value. Develop a skill or service so valuable that employers or customers will seek you out." },
+                    { alibi: "IF I had good health...", antidote: "Good health begins with health-consciousness. Master your mind to banish the fear of ill health and focus on positive thoughts." },
+                    { alibi: "IF I only had time...", antidote: "Time is a matter of priority, not availability. A definite plan helps you budget your time effectively. Stop spending time and start investing it." },
+                    { alibi: "IF times were better...", antidote: "Every 'bad' time is an opportunity in disguise. More millionaires were made during the Great Depression than in the boom years before it." },
+                    { alibi: "IF other people understood me...", antidote: "It's not others' job to understand you; it's your job to understand them and communicate your value." },
+                    { alibi: "IF circumstances were different...", antidote: "You are the master of your circumstances, not their victim. Change your thoughts, and your circumstances will follow." },
+                    { alibi: "IF I could live my life over again...", antidote: "You can't. Erase this thought and focus on the 'you' of today. Your past experiences are assets if you learn from them." },
+                    { alibi: "IF I did not fear what 'they' would say...", antidote: "This is the fear of criticism. Make a firm decision to stop caring about the opinions of those who don't matter to your success." },
+                    { alibi: "IF I had been given a chance...", antidote: "Chance is not given; it is created. Edwin C. Barnes saw his chance and seized it because his desire had prepared his mind." },
+                    { alibi: "IF I now had a chance...", antidote: "You do. Your chance is to take these principles, apply them, and create the opportunity you seek." },
+                    { alibi: "IF other people didn't have it in for me...", antidote: "Most people are too busy with their own lives to have it 'in for you.' This is often a projection of your own insecurities." },
+                    { alibi: "IF nothing happens to stop me...", antidote: "Things will happen. Plan for them. Persistence is about moving forward *despite* obstacles." }
+                ]
+            };
+
+            const mainContentArea = document.getElementById('app');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            let fearChartInstance = null;
+            let currentFearQuizQuestion = 0;
+            let fearScores = {};
+
+            function navigate(targetId) {
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('bg-stone-200', 'text-stone-900');
+                    const linkTarget = link.dataset.target;
+                    const isPrincipleLink = linkTarget.startsWith('principles-');
+                    
+                    if (linkTarget === targetId || (isPrincipleLink && targetId === 'principles-detail-view')) {
+                         // Don't highlight all principle links, only the active one
+                    } else {
+                        link.classList.remove('bg-stone-200', 'text-stone-900');
+                    }
+                });
+                 document.querySelector(`.nav-link[data-target="${targetId}"]`)?.classList.add('bg-stone-200', 'text-stone-900');
+
+
+                if (targetId.startsWith('principles-') && targetId !== 'principles-hub') {
+                    document.getElementById('principles-detail-view').classList.add('active');
+                    const principleId = targetId.replace('principles-', '');
+                    renderPrincipleDetail(principleId);
+                }
+                
+                window.scrollTo(0, 0);
+                mobileMenu.classList.add('hidden');
+            }
+
+            function renderPrincipleDetail(principleId) {
+                const contentArea = document.getElementById('principle-content-area');
+                const principleData = appData.content.find(p => p.id === principleId);
+
+                if (!principleData) {
+                    contentArea.innerHTML = `<h2 class="text-2xl font-bold">Content not found.</h2>`;
+                    return;
+                }
+
+                let practiceHtml = '';
+                if (principleData.practice) {
+                    practiceHtml = `
+                        <div class="mt-8 pt-6 border-t border-stone-200">
+                            <h3 class="text-xl font-bold text-amber-600 mb-2">${principleData.practice.title}</h3>
+                            <p class="text-stone-600 mb-4">${principleData.practice.description}</p>
+                            ${principleData.practice.buttonText ? `<button class="action-button bg-amber-400 hover:bg-amber-500 text-stone-800 font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}">${principleData.practice.buttonText}</button>` : ''}
+                            ${principleData.practice.form ? principleData.practice.form : ''}
+                        </div>
+                    `;
+                }
+
+                contentArea.innerHTML = `
+                    <h2 class="text-3xl font-bold mb-4">${principleData.title}</h2>
+                    <div class="prose max-w-none text-stone-700">
+                        ${principleData.summary.split('\n').map(p => `<p>${p}</p>`).join('')}
+                    </div>
+                    ${practiceHtml}
+                `;
+                
+                document.querySelectorAll('.sidebar-link').forEach(link => {
+                     link.classList.remove('active');
+                     if(link.dataset.target === `principles-${principleId}`) {
+                         link.classList.add('active');
+                     }
+                });
+            }
+            
+            function openDesireModal() {
+                document.getElementById('desire-modal-backdrop').style.display = 'block';
+                document.getElementById('desire-modal').style.display = 'block';
+            }
+
+            function closeDesireModal() {
+                document.getElementById('desire-modal-backdrop').style.display = 'none';
+                document.getElementById('desire-modal').style.display = 'none';
+            }
+
+            function handleDesireFormSubmit(e) {
+                e.preventDefault();
+                const amount = document.getElementById('desire-amount').value;
+                const give = document.getElementById('desire-give').value;
+                const date = document.getElementById('desire-date').value;
+                const plan = document.getElementById('desire-plan').value;
+
+                if (!amount || !give || !date || !plan) {
+                    alert('Please fill out all fields to create your statement.');
+                    return;
+                }
+
+                const blueprintDiv = document.getElementById('blueprint-desire');
+                blueprintDiv.innerHTML = `
+                    <p class="mb-4">By the date of <strong>${new Date(date).toDateString()}</strong>, I will have in my possession <strong>${amount}</strong>, which will come to me in various amounts from time to time during the interim.</p>
+                    <p class="mb-4">In return for this money I will give the most efficient service of which I am capable, rendering the fullest possible quantity, and the best possible quality of service in the form of: <strong>${give}</strong>.</p>
+                    <p class="mb-4">I believe that I will have this money in my possession. My faith is so strong that I can now see this money before my eyes. I can touch it with my hands. It is now awaiting transfer to me at the time, and in the proportion that I deliver the service I intend to render in return for it.</p>
+                    <p>I am awaiting a plan by which to accumulate this money, and I will follow that plan, when it is received. My plan is as follows: <strong>${plan}</strong></p>
+                `;
+                
+                closeDesireModal();
+                alert('Your Desire Statement has been saved to "My Blueprint"! ✨');
+                navigate('blueprint');
+            }
+            
+            function handleSaveFaithFormula() {
+                const formula = document.getElementById('faith-formula').value;
+                 if (!formula) {
+                    alert('Please write your Self-Confidence Formula.');
+                    return;
+                }
+                const blueprintDiv = document.getElementById('blueprint-faith');
+                blueprintDiv.innerHTML = `<div class="prose lg:prose-lg">${formula.split('\n').map(p => `<p>${p}</p>`).join('')}</div>`;
+                alert('Your Self-Confidence Formula has been saved to "My Blueprint"! ✨');
+                navigate('blueprint');
+            }
+            
+            function startFearQuiz() {
+                currentFearQuizQuestion = 0;
+                fearScores = { "Poverty": 0, "Criticism": 0, "Ill Health": 0, "Loss of Love": 0, "Old Age": 0, "Death": 0 };
+                document.getElementById('fear-results-container').classList.add('hidden');
+                document.getElementById('fear-quiz-container').classList.remove('hidden');
+                renderFearQuestion();
+            }
+
+            function renderFearQuestion() {
+                const container = document.getElementById('fear-quiz-container');
+                if (currentFearQuizQuestion >= appData.fearQuiz.length) {
+                    showFearResults();
+                    return;
+                }
+                const question = appData.fearQuiz[currentFearQuizQuestion];
+                container.innerHTML = `
+                    <p class="text-xl font-semibold mb-6 text-center">Question ${currentFearQuizQuestion + 1} of ${appData.fearQuiz.length}</p>
+                    <p class="text-2xl mb-8 text-center">${question.q}</p>
+                    <div class="flex justify-center gap-4">
+                        <button class="fear-answer-btn bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg" data-answer="yes">Yes</button>
+                        <button class="fear-answer-btn bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-lg" data-answer="no">No</button>
+                    </div>
+                `;
+            }
+            
+            function handleFearAnswer(e) {
+                if (e.target.classList.contains('fear-answer-btn')) {
+                    const answer = e.target.dataset.answer;
+                    if (answer === 'yes') {
+                        const question = appData.fearQuiz[currentFearQuizQuestion];
+                        fearScores[question.fear]++;
+                    }
+                    currentFearQuizQuestion++;
+                    renderFearQuestion();
+                }
+            }
+
+            function showFearResults() {
+                document.getElementById('fear-quiz-container').classList.add('hidden');
+                const resultsContainer = document.getElementById('fear-results-container');
+                resultsContainer.classList.remove('hidden');
+
+                const ctx = document.getElementById('fearChart').getContext('2d');
+                if(fearChartInstance) {
+                    fearChartInstance.destroy();
+                }
+                fearChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(fearScores),
+                        datasets: [{
+                            label: 'Fear Score',
+                            data: Object.values(fearScores),
+                            backgroundColor: [
+                                'rgba(239, 68, 68, 0.6)', 'rgba(249, 115, 22, 0.6)', 'rgba(245, 158, 11, 0.6)',
+                                'rgba(132, 204, 22, 0.6)', 'rgba(34, 197, 94, 0.6)', 'rgba(16, 185, 129, 0.6)'
+                            ],
+                            borderColor: [
+                                'rgba(239, 68, 68, 1)', 'rgba(249, 115, 22, 1)', 'rgba(245, 158, 11, 1)',
+                                'rgba(132, 204, 22, 1)', 'rgba(16, 185, 129, 1)', 'rgba(16, 185, 129, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, max: 2 } },
+                        plugins: { legend: { display: false }, title: { display: true, text: 'Your Personal Fear Profile', font: {size: 18, family: "'Lora', serif"} } }
+                    }
+                });
+
+                const antidotesContainer = document.getElementById('fear-antidotes');
+                const antidotes = {
+                    "Poverty": ["Desire", "Organized Planning"],
+                    "Criticism": ["Decision", "Faith"],
+                    "Ill Health": ["Auto-Suggestion", "Subconscious Mind"],
+                    "Loss of Love": ["Faith", "Persistence"],
+                    "Old Age": ["Persistence", "Master Mind"],
+                    "Death": ["Desire", "Sixth Sense"]
+                };
+                let antidotesHtml = '<h3 class="text-2xl font-bold mb-4 text-center">Your Antidotes to Fear</h3><div class="space-y-4">';
+                let hasFears = false;
+                for(const fear in fearScores) {
+                    if(fearScores[fear] > 0) {
+                        hasFears = true;
+                        antidotesHtml += `
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <p class="font-bold text-lg">For the Fear of ${fear}:</p>
+                                <p>This fear is banished by mastering the principles of ${antidotes[fear].map(p => `<strong>${p}</strong>`).join(' and ')}. Focus your practice on these areas.</p>
+                            </div>
+                        `;
+                    }
+                }
+                if (!hasFears) {
+                    antidotesHtml += `<p class="text-center text-lg bg-white p-4 rounded-lg shadow">Congratulations! Your mindset shows a remarkable freedom from the common fears that hold others back.</p>`;
+                }
+                antidotesHtml += '</div>';
+                antidotesContainer.innerHTML = antidotesHtml;
+            }
+
+            function init() {
+                const principlesGrid = document.getElementById('principles-grid');
+                const principlesSidebar = document.getElementById('principles-sidebar');
+                
+                appData.principles.forEach((p, index) => {
+                    const gridCard = `
+                        <div class="nav-button bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer" data-target="principles-${p.id}">
+                            <div class="flex items-center mb-2">
+                                <span class="text-amber-500 font-bold text-2xl mr-3">${index + 1}</span>
+                                <h4 class="text-xl font-bold text-stone-800">${p.name}</h4>
+                            </div>
+                            <p class="text-stone-600">${p.tagline}</p>
+                        </div>
+                    `;
+                    principlesGrid.innerHTML += gridCard;
+                    
+                    const sidebarLink = `<a href="#" class="sidebar-link nav-button block px-4 py-2 text-stone-700 rounded-md hover:bg-amber-300" data-target="principles-${p.id}">${index + 1}. ${p.name}</a>`;
+                    principlesSidebar.innerHTML += sidebarLink;
+                });
+                
+                const alibiListContainer = document.getElementById('alibi-list');
+                let alibiHtml = '<div class="space-y-4">';
+                appData.alibis.forEach((item, index) => {
+                    alibiHtml += `
+                        <div>
+                            <button class="alibi-item w-full text-left p-4 bg-stone-50 hover:bg-stone-200 rounded-lg focus:outline-none">
+                                <h4 class="font-semibold">${index + 1}. ${item.alibi}</h4>
+                            </button>
+                            <div class="alibi-antidote hidden p-4 bg-amber-50 border-l-4 border-amber-400">
+                                <p class="text-stone-700">${item.antidote}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                alibiHtml += '</div>';
+                alibiListContainer.innerHTML = alibiHtml;
+
+
+                mainContentArea.addEventListener('click', e => {
+                    const navButton = e.target.closest('.nav-button');
+                    const actionButton = e.target.closest('.action-button');
+                    
+                    if (navButton && navButton.dataset.target) {
+                        e.preventDefault();
+                        if(navButton.dataset.target === 'fear-diagnostic') startFearQuiz();
+                        navigate(navButton.dataset.target);
+                    }
+                    
+                    if (actionButton) {
+                        e.preventDefault();
+                        const action = actionButton.dataset.action;
+                        if (action === 'openDesireModal') openDesireModal();
+                        if (action === 'saveFaith') handleSaveFaithFormula();
+                    }
+                    
+                    handleFearAnswer(e);
+
+                    const alibiItem = e.target.closest('.alibi-item');
+                     if(alibiItem) {
+                        const antidote = alibiItem.nextElementSibling;
+                        antidote.classList.toggle('hidden');
+                    }
+                });
+
+                document.getElementById('desire-form').addEventListener('submit', handleDesireFormSubmit);
+                document.getElementById('close-desire-modal').addEventListener('click', closeDesireModal);
+                document.getElementById('desire-modal-backdrop').addEventListener('click', closeDesireModal);
+
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+                
+                navigate('home');
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
