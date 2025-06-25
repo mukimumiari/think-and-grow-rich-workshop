@@ -843,11 +843,12 @@
             }
             
             function handleModify(principleId) {
-                renderPrincipleDetail(principleId, true); // Add a 'forceShowForm' flag
+                renderPrincipleDetail(principleId, true); 
             }
 
             function openDesireModal() {
-                // Pre-fill form if data exists
+                const desireForm = document.getElementById('desire-form');
+                desireForm.reset(); // Clear form first
                 const desireDataSource = userData?.desireData || (userData?.desireStatement ? { plan: userData.desireStatement } : null);
                 
                 if (desireDataSource) {
@@ -855,8 +856,6 @@
                     document.getElementById('desire-give').value = desireDataSource.give || '';
                     document.getElementById('desire-date').value = desireDataSource.date || '';
                     document.getElementById('desire-plan').value = desireDataSource.plan || '';
-                } else {
-                    document.getElementById('desire-form').reset();
                 }
 
                 document.getElementById('desire-modal-backdrop').style.display = 'block';
