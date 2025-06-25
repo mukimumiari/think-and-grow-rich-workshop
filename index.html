@@ -689,7 +689,7 @@
                 const desireDiv = document.getElementById('dashboard-desire');
                 const faithDiv = document.getElementById('dashboard-faith');
                 const planDiv = document.getElementById('dashboard-plan');
-                const focusDiv = document.getElementById('daily-focus');
+                const nextStepCard = document.getElementById('next-step-card');
                 
                 if (userData.desireData) {
                     const { date, amount, give, plan } = userData.desireData;
@@ -708,9 +708,20 @@
 
                 faithDiv.innerHTML = userData.faithFormula ? `<strong>My Self-Confidence Formula:</strong><div class="mt-2 text-sm">${userData.faithFormula.replace(/\n/g, '<br>')}</div>` : '<p class="italic">Create your Self-Confidence Formula in the "Faith" module.</p>';
                 
-                let randomPrinciple = appData.principles[Math.floor(Math.random()*appData.principles.length)];
-                focusDiv.innerHTML = `Principle #${appData.principles.indexOf(randomPrinciple)+1}: <strong>${randomPrinciple.name}</strong> - ${randomPrinciple.tagline}`;
-                focusDiv.setAttribute('data-target', `principles-${randomPrinciple.id}`);
+                const completedCount = userData.completedPrinciples?.length || 0;
+                const totalPrinciples = appData.principles.length;
+
+                if (completedCount >= totalPrinciples) {
+                    nextStepCard.innerHTML = `<h3 class="font-bold text-2xl mb-2">Congratulations!</h3><p>You have mastered all 13 principles. Revisit them any time to reinforce your knowledge and continue to grow.</p>`;
+                } else {
+                    const nextPrinciple = appData.principles[completedCount];
+                    nextStepCard.innerHTML = `
+                        <h3 class="font-bold text-2xl mb-2">Your Next Step</h3>
+                        <p class="mb-4">Principle #${completedCount + 1}: <strong>${nextPrinciple.name}</strong> - ${nextPrinciple.tagline}</p>
+                        <button class="nav-button bg-white text-purple-600 font-bold py-2 px-4 rounded-lg transition" data-target="principles-${nextPrinciple.id}">Begin Now</button>
+                    `;
+                }
+               
 
 
                 let planHtml = '<p class="italic">No action plan created. Go to the "Organized Planning" module to start.</p>';
@@ -728,8 +739,7 @@
                 planDiv.innerHTML = planHtml;
 
 
-                const completedCount = userData.completedPrinciples?.length || 0;
-                const totalPrinciples = appData.principles.length;
+                
                 const ctx = document.getElementById('progressChart').getContext('2d');
                 if(progressChartInstance) progressChartInstance.destroy();
                 progressChartInstance = new Chart(ctx, {
@@ -761,10 +771,13 @@
             function renderPrincipleGrid() {
                  const principlesGrid = document.getElementById('principles-grid');
                  principlesGrid.innerHTML = '';
+                 const completedCount = userData?.completedPrinciples?.length || 0;
+
                  appData.principles.forEach((p, index) => {
                     const isCompleted = userData?.completedPrinciples?.includes(p.id);
+                    const isLocked = index > completedCount;
                     const gridCard = `
-                        <div class="nav-button principle-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 ${isCompleted ? 'completed' : ''}" data-target="principles-${p.id}">
+                        <div class="nav-button principle-card bg-white p-6 rounded-lg shadow-lg ${isLocked ? 'locked' : 'hover:shadow-xl hover:-translate-y-1'} ${isCompleted ? 'completed' : ''}" data-target="${isLocked ? '' : 'principles-' + p.id}">
                             <div class="completion-check"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div>
                             <div class="flex items-center mb-2">
                                 <span class="text-amber-500 font-bold text-2xl mr-3">${index + 1}</span>
@@ -1093,28 +1106,31 @@
             function initStaticContent() {
                 
                 const principlesSidebar = document.getElementById('principles-sidebar');
-                
-                appData.principles.forEach((p, index) => {
-                    const sidebarLink = `<a href="#" class="sidebar-link nav-button block px-4 py-2 text-stone-700 rounded-md hover:bg-amber-300" data-target="principles-${p.id}">${index + 1}. ${p.name}</a>`;
-                    principlesSidebar.innerHTML += sidebarLink;
-                });
+                if (principlesSidebar) {
+                    appData.principles.forEach((p, index) => {
+                        const sidebarLink = `<a href="#" class="sidebar-link nav-button block px-4 py-2 text-stone-700 rounded-md hover:bg-amber-300" data-target="principles-${p.id}">${index + 1}. ${p.name}</a>`;
+                        principlesSidebar.innerHTML += sidebarLink;
+                    });
+                }
                 
                 const alibiListContainer = document.getElementById('alibi-list');
-                let alibiHtml = '<div class="space-y-4">';
-                appData.alibis.forEach((item, index) => {
-                    alibiHtml += `
-                        <div>
-                            <button class="alibi-item w-full text-left p-4 bg-stone-50 hover:bg-stone-200 rounded-lg focus:outline-none">
-                                <h4 class="font-semibold">${index + 1}. ${item.alibi}</h4>
-                            </button>
-                            <div class="alibi-antidote hidden p-4 bg-amber-50 border-l-4 border-amber-400">
-                                <p class="text-stone-700">${item.antidote}</p>
+                 if(alibiListContainer) {
+                    let alibiHtml = '<div class="space-y-4">';
+                    appData.alibis.forEach((item, index) => {
+                        alibiHtml += `
+                            <div>
+                                <button class="alibi-item w-full text-left p-4 bg-stone-50 hover:bg-stone-200 rounded-lg focus:outline-none">
+                                    <h4 class="font-semibold">${index + 1}. ${item.alibi}</h4>
+                                </button>
+                                <div class="alibi-antidote hidden p-4 bg-amber-50 border-l-4 border-amber-400">
+                                    <p class="text-stone-700">${item.antidote}</p>
+                                </div>
                             </div>
-                        </div>
-                    `;
-                });
-                alibiHtml += '</div>';
-                alibiListContainer.innerHTML = alibiHtml;
+                        `;
+                    });
+                    alibiHtml += '</div>';
+                    alibiListContainer.innerHTML = alibiHtml;
+                 }
 
 
                 mainContentArea.addEventListener('click', e => {
