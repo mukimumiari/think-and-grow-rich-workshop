@@ -619,7 +619,7 @@
                     } else {
                         // Initialize with default structure if no data exists
                         userData = {
-                            desireStatement: '',
+                            desireData: null,
                             faithFormula: '',
                             actionPlan: [],
                             completedPrinciples: []
@@ -705,12 +705,23 @@
                 const faithDiv = document.getElementById('dashboard-faith');
                 const planDiv = document.getElementById('dashboard-plan');
                 const focusDiv = document.getElementById('daily-focus');
+                
+                if (userData.desireData) {
+                    const { date, amount, give, plan } = userData.desireData;
+                    desireDiv.innerHTML = `
+                        <p class="mb-4">By the date of <strong>${new Date(date).toDateString()}</strong>, I will have in my possession <strong>${amount}</strong>, which will come to me in various amounts from time to time during the interim.</p>
+                        <p class="mb-4">In return for this money I will give the most efficient service of which I am capable, rendering the fullest possible quantity, and the best possible quality of service in the form of: <strong>${give}</strong>.</p>
+                        <p>My plan is as follows: <strong>${plan}</strong></p>
+                    `;
+                } else {
+                    desireDiv.innerHTML = '<p class="italic">Define your Definite Chief Aim in the "Desire" module.</p>';
+                }
 
-                desireDiv.innerHTML = userData.desireStatement || '<p class="italic">Define your Definite Chief Aim in the "Desire" module.</p>';
+
                 faithDiv.innerHTML = userData.faithFormula ? `<strong>My Self-Confidence Formula:</strong><div class="mt-2 text-sm italic">${userData.faithFormula.substring(0,150)}...</div>` : '<p class="italic">Create your Self-Confidence Formula in the "Faith" module.</p>';
                 
                 let randomPrinciple = appData.principles[Math.floor(Math.random()*appData.principles.length)];
-                focusDiv.innerHTML = `Principle #${randomPrinciple.id}: <strong>${randomPrinciple.name}</strong> - ${randomPrinciple.tagline}`;
+                focusDiv.innerHTML = `Principle #${appData.principles.indexOf(randomPrinciple)+1}: <strong>${randomPrinciple.name}</strong> - ${randomPrinciple.tagline}`;
 
                 let planHtml = '<p class="italic">No action plan created. Go to the "Organized Planning" module to start.</p>';
                 if(userData.actionPlan && userData.actionPlan.length > 0) {
@@ -785,15 +796,12 @@
 
                 let practiceHtml = '';
                 if (principleData.practice) {
-                    
                     let practiceContent = '';
 
                     // Special handling for the 'desire' button
-                    if(principleId === 'desire' && userData?.desireStatement) {
-                         practiceContent = `<div class="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg">
-                            <p class="font-bold">Complete!</p>
-                            <p>You have defined your Definite Chief Aim. You can review it on your Dashboard.</p>
-                        </div>`;
+                    if (principleId === 'desire') {
+                        const buttonText = userData?.desireData ? "Modify My Desire" : "Define My Desire";
+                        practiceContent = `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="openDesireModal" data-principle="${principleId}">${buttonText}</button>`;
                     } else if (principleData.practice.buttonText) {
                          practiceContent = `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}" data-principle="${principleId}">${principleData.practice.buttonText}</button>`;
                     } else {
@@ -831,6 +839,17 @@
             }
             
             function openDesireModal() {
+                // Pre-fill form if data exists
+                if (userData?.desireData) {
+                    document.getElementById('desire-amount').value = userData.desireData.amount || '';
+                    document.getElementById('desire-give').value = userData.desireData.give || '';
+                    document.getElementById('desire-date').value = userData.desireData.date || '';
+                    document.getElementById('desire-plan').value = userData.desireData.plan || '';
+                } else {
+                    // Clear form if no data exists
+                    document.getElementById('desire-form').reset();
+                }
+
                 document.getElementById('desire-modal-backdrop').style.display = 'block';
                 document.getElementById('desire-modal').style.display = 'block';
             }
@@ -842,25 +861,20 @@
 
             async function handleDesireFormSubmit(e) {
                 e.preventDefault();
-                const amount = document.getElementById('desire-amount').value;
-                const give = document.getElementById('desire-give').value;
-                const date = document.getElementById('desire-date').value;
-                const plan = document.getElementById('desire-plan').value;
+                const desireData = {
+                    amount: document.getElementById('desire-amount').value,
+                    give: document.getElementById('desire-give').value,
+                    date: document.getElementById('desire-date').value,
+                    plan: document.getElementById('desire-plan').value,
+                };
 
-                if (!amount || !give || !date || !plan) {
+                if (!desireData.amount || !desireData.give || !desireData.date || !desireData.plan) {
                     alert('Please fill out all fields to create your statement.');
                     return;
                 }
-
-                const statementHTML = `
-                    <p class="mb-4">By the date of <strong>${new Date(date).toDateString()}</strong>, I will have in my possession <strong>${amount}</strong>, which will come to me in various amounts from time to time during the interim.</p>
-                    <p class="mb-4">In return for this money I will give the most efficient service of which I am capable, rendering the fullest possible quantity, and the best possible quality of service in the form of: <strong>${give}</strong>.</p>
-                    <p class="mb-4">I believe that I will have this money in my possession. My faith is so strong that I can now see this money before my eyes. I can touch it with my hands. It is now awaiting transfer to me at the time, and in the proportion that I deliver the service I intend to render in return for it.</p>
-                    <p>I am awaiting a plan by which to accumulate this money, and I will follow that plan, when it is received. My plan is as follows: <strong>${plan}</strong></p>
-                `;
                 
                 await markPrincipleComplete('desire');
-                await saveUserData({ desireStatement: statementHTML });
+                await saveUserData({ desireData: desireData });
                 renderDashboard();
                 
                 closeDesireModal();
