@@ -647,16 +647,35 @@
                 }
             }
             
-            async function handleResetProgress() {
-                const initialData = {
-                    desireData: null,
-                    faithFormula: '',
-                    actionPlan: [],
-                    completedPrinciples: []
+            async function handleResetFromPrinciple(principleId) {
+                if (!userData || !userData.completedPrinciples) return;
+
+                const principleIndex = appData.principles.findIndex(p => p.id === principleId);
+                if (principleIndex === -1) return;
+
+                const principlesToReset = appData.principles.slice(principleIndex).map(p => p.id);
+                
+                const dataToUpdate = {
+                    completedPrinciples: userData.completedPrinciples.filter(pId => !principlesToReset.includes(pId))
                 };
-                await saveUserData(initialData);
-                renderDashboard();
+                
+                if (principlesToReset.includes('desire')) {
+                    dataToUpdate.desireData = null;
+                    dataToUpdate.desireStatement = null; // for backward compatibility
+                }
+                if (principlesToReset.includes('faith')) {
+                    dataToUpdate.faithFormula = '';
+                }
+                if (principlesToReset.includes('organized-planning')) {
+                    dataToUpdate.actionPlan = [];
+                }
+
+                await saveUserData(dataToUpdate);
+                await loadUserData(userId); // Reload all data to ensure consistency
+                
+                closeResetModal();
                 navigate('dashboard');
+                alert('Your progress has been reset from this point.');
             }
 
 
@@ -1218,7 +1237,7 @@
                     }
                 });
                 
-                document.getElementById('reset-progress-btn').addEventListener('click', () => {
+                document.getElementById('reset-progress-btn')?.addEventListener('click', () => {
                     if(confirm("Are you sure you want to reset ALL your progress? This cannot be undone.")) {
                        handleResetProgress();
                     }
@@ -1229,10 +1248,12 @@
                 document.getElementById('desire-modal-backdrop').addEventListener('click', closeDesireModal);
                 
                 const resetModal = document.getElementById('reset-confirm-modal');
-                document.getElementById('cancel-reset-btn').addEventListener('click', () => resetModal.style.display = 'none');
+                document.getElementById('cancel-reset-btn').addEventListener('click', () => {
+                    resetModal.style.display = 'none';
+                    document.getElementById('desire-modal-backdrop').style.display = 'none';
+                });
                 document.getElementById('confirm-reset-btn').addEventListener('click', (e) => {
                     handleResetFromPrinciple(e.target.dataset.principleId);
-                    resetModal.style.display = 'none';
                 });
 
                 googleLoginBtn.addEventListener('click', handleGoogleLogin);
