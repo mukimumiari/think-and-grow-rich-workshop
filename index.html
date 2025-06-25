@@ -801,12 +801,17 @@
                 if (principleData.practice) {
                     let practiceContent = '';
 
-                    // Special handling for the 'desire' button
-                    if (principleId === 'desire') {
-                        const hasDesire = userData?.desireData || userData?.desireStatement;
-                        const buttonText = hasDesire ? "Modify My Desire" : "Define My Desire";
-                        practiceContent = `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="openDesireModal" data-principle="${principleId}">${buttonText}</button>`;
-                    } else if (principleData.practice.buttonText) {
+                    // Check if the practice for this principle has been completed
+                    const isCompleted = userData?.completedPrinciples?.includes(principleId);
+
+                    if (isCompleted) {
+                         practiceContent = `<div class="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg">
+                            <p class="font-bold">Principle Mastered!</p>
+                            <p>You have completed the core exercise for this principle. You can review your work on the Dashboard or choose to modify it.</p>
+                        </div>
+                        <button class="action-button mt-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition" data-action="${principleData.practice.action}" data-principle="${principleId}">Modify</button>`;
+                    }
+                    else if (principleData.practice.buttonText) {
                          practiceContent = `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}" data-principle="${principleId}">${principleData.practice.buttonText}</button>`;
                     } else {
                         practiceContent = principleData.practice.form || '';
@@ -840,17 +845,36 @@
                     renderActionPlan();
                     renderLeadershipSliders();
                 }
+
+                // Pre-fill faith formula if modifying
+                if(principleId === 'faith' && isCompleted) {
+                    const modifyButton = contentArea.querySelector('[data-action="saveFaith"]');
+                    if(modifyButton) {
+                        modifyButton.addEventListener('click', () => {
+                           const formContainer = modifyButton.parentElement;
+                           formContainer.innerHTML = principleData.practice.form;
+                           document.getElementById('faith-formula').value = userData.faithFormula || '';
+                           formContainer.querySelector('[data-action="saveFaith"]').addEventListener('click', handleSaveFaithFormula);
+                        });
+                    }
+                } else if (principleId === 'faith') {
+                    const faithTextarea = document.getElementById('faith-formula');
+                    if(faithTextarea && userData?.faithFormula) {
+                        faithTextarea.value = userData.faithFormula;
+                    }
+                }
             }
             
             function openDesireModal() {
                 // Pre-fill form if data exists
-                if (userData?.desireData) {
-                    document.getElementById('desire-amount').value = userData.desireData.amount || '';
-                    document.getElementById('desire-give').value = userData.desireData.give || '';
-                    document.getElementById('desire-date').value = userData.desireData.date || '';
-                    document.getElementById('desire-plan').value = userData.desireData.plan || '';
+                const desireDataSource = userData?.desireData || (userData?.desireStatement ? { plan: userData.desireStatement } : null);
+                
+                if (desireDataSource) {
+                    document.getElementById('desire-amount').value = desireDataSource.amount || '';
+                    document.getElementById('desire-give').value = desireDataSource.give || '';
+                    document.getElementById('desire-date').value = desireDataSource.date || '';
+                    document.getElementById('desire-plan').value = desireDataSource.plan || '';
                 } else {
-                    // Clear form if no data exists
                     document.getElementById('desire-form').reset();
                 }
 
