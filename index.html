@@ -804,15 +804,16 @@
                     // Check if the practice for this principle has been completed
                     const isCompleted = userData?.completedPrinciples?.includes(principleId);
 
-                    if (isCompleted) {
+                    if (isCompleted && principleData.practice.form) {
                          practiceContent = `<div class="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg">
                             <p class="font-bold">Principle Mastered!</p>
                             <p>You have completed the core exercise for this principle. You can review your work on the Dashboard or choose to modify it.</p>
                         </div>
-                        <button class="action-button mt-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition" data-action="${principleData.practice.action}" data-principle="${principleId}">Modify</button>`;
+                        <button class="action-button mt-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition" data-action="modify" data-principle-id="${principleId}">Modify</button>`;
                     }
                     else if (principleData.practice.buttonText) {
-                         practiceContent = `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}" data-principle="${principleId}">${principleData.practice.buttonText}</button>`;
+                         const buttonText = (principleId === 'desire' && (userData?.desireData || userData?.desireStatement)) ? "Modify My Desire" : principleData.practice.buttonText;
+                         practiceContent = `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}" data-principle-id="${principleId}">${buttonText}</button>`;
                     } else {
                         practiceContent = principleData.practice.form || '';
                     }
@@ -846,18 +847,8 @@
                     renderLeadershipSliders();
                 }
 
-                // Pre-fill faith formula if modifying
-                if(principleId === 'faith' && isCompleted) {
-                    const modifyButton = contentArea.querySelector('[data-action="saveFaith"]');
-                    if(modifyButton) {
-                        modifyButton.addEventListener('click', () => {
-                           const formContainer = modifyButton.parentElement;
-                           formContainer.innerHTML = principleData.practice.form;
-                           document.getElementById('faith-formula').value = userData.faithFormula || '';
-                           formContainer.querySelector('[data-action="saveFaith"]').addEventListener('click', handleSaveFaithFormula);
-                        });
-                    }
-                } else if (principleId === 'faith') {
+                // Pre-fill faith formula if it's the initial render of the form
+                if(principleId === 'faith' && !isCompleted) {
                     const faithTextarea = document.getElementById('faith-formula');
                     if(faithTextarea && userData?.faithFormula) {
                         faithTextarea.value = userData.faithFormula;
@@ -865,6 +856,22 @@
                 }
             }
             
+            function handleModify(principleId) {
+                const principleData = appData.content.find(p => p.id === principleId);
+                if (!principleData || !principleData.practice) return;
+
+                const practiceContainer = document.querySelector(`[data-principle-id="${principleId}"]`).parentElement;
+                practiceContainer.innerHTML = principleData.practice.form;
+
+                if (principleId === 'faith') {
+                    const formulaTextarea = document.getElementById('faith-formula');
+                    if (formulaTextarea) {
+                        formulaTextarea.value = userData.faithFormula || '';
+                    }
+                    practiceContainer.querySelector('[data-action="saveFaith"]').addEventListener('click', handleSaveFaithFormula);
+                }
+            }
+
             function openDesireModal() {
                 // Pre-fill form if data exists
                 const desireDataSource = userData?.desireData || (userData?.desireStatement ? { plan: userData.desireStatement } : null);
@@ -1155,6 +1162,7 @@
                         const action = actionButton.dataset.action;
                         if (action === 'openDesireModal') openDesireModal();
                         if (action === 'saveFaith') handleSaveFaithFormula();
+                        if (action === 'modify') handleModify(actionButton.dataset.principleId);
                     }
                     
                     if (e.target.id === 'add-task-btn') {
