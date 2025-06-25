@@ -54,6 +54,9 @@
             height: 400px;
             max-height: 50vh;
         }
+        #status-indicator {
+            transition: opacity 0.5s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-stone-100 text-stone-800">
@@ -76,6 +79,9 @@
                             <a href="#" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-target="workshop">The Workshop</a>
                             <a href="#" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-target="blueprint">My Blueprint</a>
                         </div>
+                    </div>
+                     <div id="status-indicator" class="text-sm text-gray-500 opacity-0">
+                        Connecting...
                     </div>
                     <div class="md:hidden">
                         <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-stone-600 hover:text-stone-800 hover:bg-stone-200 focus:outline-none">
@@ -177,18 +183,17 @@
                     <div class="bg-white p-8 rounded-lg shadow-lg">
                         <h3 class="font-bold text-2xl mb-4 text-amber-600">My Definite Chief Aim</h3>
                         <div id="blueprint-desire" class="text-stone-700 prose lg:prose-lg">
-                            <p class="italic">You have not yet defined your Desire. Complete the exercise in the "Desire" principle to see it here.</p>
+                            <p class="italic">Loading your data...</p>
                         </div>
                     </div>
                      <div class="bg-white p-8 rounded-lg shadow-lg">
                         <h3 class="font-bold text-2xl mb-4 text-amber-600">My Self-Confidence Formula</h3>
                         <div id="blueprint-faith" class="text-stone-700 prose lg:prose-lg">
-                             <p class="italic">You have not yet defined your Self-Confidence Formula. Complete the exercise in the "Faith" principle to see it here.</p>
+                             <p class="italic">Loading your data...</p>
                         </div>
                     </div>
                 </div>
             </div>
-
         </main>
     </div>
 
@@ -220,8 +225,18 @@
         </form>
     </div>
 
-    <script>
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Main App Logic
         document.addEventListener('DOMContentLoaded', function() {
+            // Firebase and App State
+            let db, auth, userId;
+            let isAuthReady = false;
+
             const appData = {
                 principles: [
                     { id: 'desire', name: 'Desire', tagline: 'The Turning Point of All Achievement' },
@@ -259,7 +274,7 @@
                             description: "To build faith, you must impress your subconscious mind with positive affirmations. Hill provides a five-step Self-Confidence Formula. Write out your own version of this formula below. Read it aloud once daily, and over time, it will develop in you the self-confidence to achieve any object.",
                             form: `
                                 <textarea id="faith-formula" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-amber-400 focus:ring focus:ring-amber-300 focus:ring-opacity-50" rows="8" placeholder="1. I know that I have the ability to achieve the object of my Definite Purpose in life... \n2. I realize the dominating thoughts of my mind will eventually reproduce themselves in outward, physical action...\n3. I know through the principle of auto-suggestion, any desire that I persistently hold in my mind will eventually seek expression... \n4. I have clearly written down a description of my definite chief aim in life...\n5. I fully realize that no wealth or position can long endure, unless built upon truth and justice..."></textarea>
-                                <button id="save-faith-formula" class="action-button mt-4 px-6 py-2 bg-amber-400 text-stone-800 font-bold rounded-lg hover:bg-amber-500" data-action="saveFaith">Save to My Blueprint</button>
+                                <button class="action-button mt-4 px-6 py-2 bg-amber-400 text-stone-800 font-bold rounded-lg hover:bg-amber-500" data-action="saveFaith">Save to My Blueprint</button>
                             `
                         }
                     },
@@ -441,11 +456,107 @@
             const mainContentArea = document.getElementById('app');
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
+            const statusIndicator = document.getElementById('status-indicator');
 
             let fearChartInstance = null;
             let currentFearQuizQuestion = 0;
             let fearScores = {};
+            
+            // --- Firebase Setup ---
+            async function setupFirebase() {
+                try {
+                    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+                    if (!firebaseConfig) {
+                        console.error("Firebase config not found.");
+                        showStatus("Error: Config missing", true);
+                        return;
+                    }
+                    
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                    
+                    onAuthStateChanged(auth, async (user) => {
+                        if (user) {
+                            userId = user.uid;
+                            isAuthReady = true;
+                            showStatus("Connected", false);
+                            await loadBlueprintData(userId);
+                        } else {
+                            isAuthReady = false;
+                            userId = null;
+                            showStatus("Not Connected", true);
+                        }
+                    });
 
+                    const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                    if (token) {
+                        await signInWithCustomToken(auth, token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Firebase Initialization Error:", error);
+                    showStatus("Connection Failed", true);
+                }
+            }
+
+            function showStatus(message, isError) {
+                statusIndicator.textContent = message;
+                statusIndicator.style.opacity = '1';
+                statusIndicator.style.color = isError ? '#ef4444' : '#22c55e';
+                if (!isError) {
+                    setTimeout(() => {
+                        statusIndicator.style.opacity = '0';
+                    }, 3000);
+                }
+            }
+            
+            async function loadBlueprintData(uid) {
+                if (!db || !uid) return;
+                
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const docRef = doc(db, `artifacts/${appId}/users/${uid}/blueprint`, "data");
+                
+                try {
+                    const docSnap = await getDoc(docRef);
+                    const blueprintDesireDiv = document.getElementById('blueprint-desire');
+                    const blueprintFaithDiv = document.getElementById('blueprint-faith');
+
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        blueprintDesireDiv.innerHTML = data.desireStatement || '<p class="italic">You have not yet defined your Desire. Complete the exercise in the "Desire" principle to see it here.</p>';
+                        blueprintFaithDiv.innerHTML = data.faithFormula ? `<div class="prose lg:prose-lg">${data.faithFormula.split('\n').map(p => `<p>${p}</p>`).join('')}</div>` : '<p class="italic">You have not yet defined your Self-Confidence Formula. Complete the exercise in the "Faith" principle to see it here.</p>';
+                    } else {
+                        blueprintDesireDiv.innerHTML = '<p class="italic">You have not yet defined your Desire. Complete the exercise in the "Desire" principle to see it here.</p>';
+                        blueprintFaithDiv.innerHTML = '<p class="italic">You have not yet defined your Self-Confidence Formula. Complete the exercise in the "Faith" principle to see it here.</p>';
+                    }
+                } catch (error) {
+                    console.error("Error loading blueprint data:", error);
+                    showStatus("Load Failed", true);
+                }
+            }
+            
+             async function saveBlueprintData(dataToSave) {
+                if (!isAuthReady || !db || !userId) {
+                    alert("Not connected to the database. Please wait and try again.");
+                    return;
+                }
+                showStatus("Saving...", false);
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/blueprint`, "data");
+                try {
+                    await setDoc(docRef, dataToSave, { merge: true });
+                    showStatus("Saved!", false);
+                } catch (error) {
+                    console.error("Error saving data: ", error);
+                    showStatus("Save Failed", true);
+                    alert("There was an error saving your data. Please check the console for details.");
+                }
+            }
+
+
+            // --- UI and Navigation ---
             function navigate(targetId) {
                 document.querySelectorAll('.content-section').forEach(section => {
                     section.classList.remove('active');
@@ -457,17 +568,8 @@
 
                 document.querySelectorAll('.nav-link').forEach(link => {
                     link.classList.remove('bg-stone-200', 'text-stone-900');
-                    const linkTarget = link.dataset.target;
-                    const isPrincipleLink = linkTarget.startsWith('principles-');
-                    
-                    if (linkTarget === targetId || (isPrincipleLink && targetId === 'principles-detail-view')) {
-                         // Don't highlight all principle links, only the active one
-                    } else {
-                        link.classList.remove('bg-stone-200', 'text-stone-900');
-                    }
                 });
                  document.querySelector(`.nav-link[data-target="${targetId}"]`)?.classList.add('bg-stone-200', 'text-stone-900');
-
 
                 if (targetId.startsWith('principles-') && targetId !== 'principles-hub') {
                     document.getElementById('principles-detail-view').classList.add('active');
@@ -484,7 +586,7 @@
                 const principleData = appData.content.find(p => p.id === principleId);
 
                 if (!principleData) {
-                    contentArea.innerHTML = `<h2 class="text-2xl font-bold">Content not found.</h2>`;
+                    contentArea.innerHTML = `<h2 class="text-2xl font-bold">Content not found for ID: ${principleId}</h2>`;
                     return;
                 }
 
@@ -526,7 +628,7 @@
                 document.getElementById('desire-modal').style.display = 'none';
             }
 
-            function handleDesireFormSubmit(e) {
+            async function handleDesireFormSubmit(e) {
                 e.preventDefault();
                 const amount = document.getElementById('desire-amount').value;
                 const give = document.getElementById('desire-give').value;
@@ -538,31 +640,37 @@
                     return;
                 }
 
-                const blueprintDiv = document.getElementById('blueprint-desire');
-                blueprintDiv.innerHTML = `
+                const statementHTML = `
                     <p class="mb-4">By the date of <strong>${new Date(date).toDateString()}</strong>, I will have in my possession <strong>${amount}</strong>, which will come to me in various amounts from time to time during the interim.</p>
                     <p class="mb-4">In return for this money I will give the most efficient service of which I am capable, rendering the fullest possible quantity, and the best possible quality of service in the form of: <strong>${give}</strong>.</p>
                     <p class="mb-4">I believe that I will have this money in my possession. My faith is so strong that I can now see this money before my eyes. I can touch it with my hands. It is now awaiting transfer to me at the time, and in the proportion that I deliver the service I intend to render in return for it.</p>
                     <p>I am awaiting a plan by which to accumulate this money, and I will follow that plan, when it is received. My plan is as follows: <strong>${plan}</strong></p>
                 `;
                 
+                await saveBlueprintData({ desireStatement: statementHTML });
+                document.getElementById('blueprint-desire').innerHTML = statementHTML;
+                
                 closeDesireModal();
-                alert('Your Desire Statement has been saved to "My Blueprint"! ✨');
+                alert('Your Desire Statement has been saved!');
                 navigate('blueprint');
             }
             
-            function handleSaveFaithFormula() {
-                const formula = document.getElementById('faith-formula').value;
-                 if (!formula) {
+            async function handleSaveFaithFormula() {
+                const formulaText = document.getElementById('faith-formula').value;
+                if (!formulaText) {
                     alert('Please write your Self-Confidence Formula.');
                     return;
                 }
+
+                await saveBlueprintData({ faithFormula: formulaText });
+                
                 const blueprintDiv = document.getElementById('blueprint-faith');
-                blueprintDiv.innerHTML = `<div class="prose lg:prose-lg">${formula.split('\n').map(p => `<p>${p}</p>`).join('')}</div>`;
-                alert('Your Self-Confidence Formula has been saved to "My Blueprint"! ✨');
+                blueprintDiv.innerHTML = `<div class="prose lg:prose-lg">${formulaText.split('\n').map(p => `<p>${p}</p>`).join('')}</div>`;
+                alert('Your Self-Confidence Formula has been saved!');
                 navigate('blueprint');
             }
             
+            // --- Workshop Tools ---
             function startFearQuiz() {
                 currentFearQuizQuestion = 0;
                 fearScores = { "Poverty": 0, "Criticism": 0, "Ill Health": 0, "Loss of Love": 0, "Old Age": 0, "Death": 0 };
@@ -663,8 +771,9 @@
                 antidotesHtml += '</div>';
                 antidotesContainer.innerHTML = antidotesHtml;
             }
-
-            function init() {
+            
+            // --- App Initialization ---
+            function initStaticContent() {
                 const principlesGrid = document.getElementById('principles-grid');
                 const principlesSidebar = document.getElementById('principles-sidebar');
                 
@@ -738,8 +847,11 @@
                 
                 navigate('home');
             }
+            
+            // --- Run App ---
+            initStaticContent();
+            setupFirebase();
 
-            init();
         });
     </script>
 </body>
