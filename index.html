@@ -18,6 +18,11 @@
         }
         .content-section {
             display: none;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         .content-section.active {
             display: block;
@@ -66,12 +71,16 @@
         }
         .prose strong { color: #A855F7; }
         .prose blockquote { border-left-color: #FBBF24; }
+        .task-item.completed span {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body class="bg-stone-100 text-stone-800">
     <!-- Chosen Palette: Warm Harmony -->
-    <!-- Application Structure Plan: A guided journey structure is used. The app is divided into four main sections accessible via a top navigation: Home, The 13 Principles, The Workshop (for self-analysis), and My Blueprint (a summary of user inputs). This structure logically separates the core philosophy from practical application tools, guiding the user from learning to doing. The 13 Principles section uses a sidebar for sub-navigation, allowing users to either follow the sequence or jump to a specific concept. This promotes both structured learning and flexible exploration, making the dense material more digestible and user-friendly. -->
-    <!-- Visualization & Content Choices: 1. **Principles Overview**: Goal: Organize. Method: Interactive card grid. Interaction: Click to navigate. Justification: Visual, scannable entry points to complex topics. 2. **Desire Formula**: Goal: Practice. Method: Modal form. Interaction: User input generates formatted text. Justification: Turns a core book exercise into an actionable tool. 3. **Fear Diagnostic**: Goal: Diagnose/Compare. Method: Quiz feeding a Bar Chart (Chart.js). Interaction: User answers questions, chart visualizes scores. Justification: A bar chart provides an immediate, clear comparison of the user's "fears," making the abstract concept personal and measurable. 4. **Alibis List**: Goal: Organize/Inform. Method: Interactive accordion. Interaction: Click to reveal content. Justification: Manages a long list of text items, preventing cognitive overload. -->
+    <!-- Application Structure Plan: A dashboard-centric, guided journey. Post-login, the user lands on a personal Dashboard summarizing their core mission (Definite Chief Aim) and progress. This immediately grounds them in their own data. The main navigation allows exploration of the 13 Principles (the curriculum) and diagnostic Workshop tools. This separates learning from doing and reviewing, creating a clear, motivating user flow that prioritizes personal application over simple content consumption. -->
+    <!-- Visualization & Content Choices: 1. **Dashboard Progress**: Goal: Motivate/Inform. Method: Circular Progress Chart (Chart.js Doughnut). Interaction: Visual feedback. Justification: Provides an immediate, gamified overview of the user's journey completion, encouraging further engagement. 2. **Action Plan**: Goal: Practice/Track. Method: Interactive To-Do List. Interaction: Add, check-off tasks. Justification: Transforms a static planning exercise into a dynamic, actionable tool that saves progress, making the principle of Organized Planning tangible. 3. **Fear Diagnostic**: Goal: Diagnose/Compare. Method: Quiz feeding a Bar Chart (Chart.js). Justification: A bar chart gives a quick, clear comparison of the user's "fears," making the abstract concept personal and measurable. 4. **Leadership Self-Assessment**: Goal: Self-reflection. Method: Range sliders. Interaction: User rates themselves. Justification: More interactive and visually engaging than simple number inputs, encouraging more thoughtful self-assessment. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <div id="login-overlay" class="flex items-center justify-center">
@@ -93,16 +102,14 @@
                         <h1 class="text-2xl font-bold text-stone-700">Think & Grow Rich</h1>
                     </div>
                     <div class="hidden md:block">
-                        <div class="ml-10 flex items-baseline space-x-4">
-                            <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="home">Home</a>
-                            <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="principles-hub">The 13 Principles</a>
-                            <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="workshop">The Workshop</a>
-                            <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="blueprint">My Blueprint</a>
+                        <div id="main-nav" class="ml-10 flex items-baseline space-x-4">
+                            <!-- Nav links will be injected here -->
                         </div>
                     </div>
-                     <div id="status-indicator" class="text-sm text-gray-500 opacity-0">
-                        Connecting...
-                    </div>
+                     <div id="user-area" class="flex items-center gap-4">
+                         <div id="status-indicator" class="text-sm text-gray-500 opacity-0">Connecting...</div>
+                         <button id="sign-out-btn" class="hidden nav-button bg-stone-200 hover:bg-stone-300 text-stone-800 font-bold py-2 px-4 rounded-lg transition duration-300">Sign Out</button>
+                     </div>
                     <div class="md:hidden">
                         <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-stone-600 hover:text-stone-800 hover:bg-stone-200 focus:outline-none">
                             <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -113,11 +120,8 @@
                 </div>
             </nav>
             <div id="mobile-menu" class="md:hidden hidden">
-                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                    <a href="#" class="nav-link nav-button block px-3 py-2 rounded-md text-base font-medium" data-target="home">Home</a>
-                    <a href="#" class="nav-link nav-button block px-3 py-2 rounded-md text-base font-medium" data-target="principles-hub">The 13 Principles</a>
-                    <a href="#" class="nav-link nav-button block px-3 py-2 rounded-md text-base font-medium" data-target="workshop">The Workshop</a>
-                    <a href="#" class="nav-link nav-button block px-3 py-2 rounded-md text-base font-medium" data-target="blueprint">My Blueprint</a>
+                <div id="mobile-nav" class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <!-- Mobile nav links will be injected here -->
                 </div>
             </div>
         </header>
@@ -127,8 +131,29 @@
                 <div class="text-center bg-white p-8 rounded-lg shadow-lg">
                     <h2 class="text-4xl font-bold text-stone-800 mb-4">"Whatever the Mind Can Conceive and Believe, It Can Achieve."</h2>
                     <p class="text-lg text-stone-600 max-w-3xl mx-auto mb-6">Welcome to the interactive workshop for Napoleon Hill's timeless classic, *Think and Grow Rich*. This is not just a book to be read; it's a philosophy to be lived. This digital experience is designed to help you move beyond passive reading into active practice. Here, you will find tools and exercises to help you define your desires, build unshakeable faith, and create actionable plans to transform your dreams into reality.</p>
-                    <p class="text-lg text-stone-600 max-w-3xl mx-auto mb-8">Begin your journey by exploring the 13 Principles, diagnose your mental obstacles in The Workshop, and build your personal success plan in My Blueprint. Your journey to riches—in wealth, happiness, and spiritual satisfaction—starts now.</p>
+                    <p class="text-lg text-stone-600 max-w-3xl mx-auto mb-8">Begin your journey by exploring the 13 Principles, diagnose your mental obstacles in The Workshop, and build your personal success plan in your Dashboard. Your journey to riches—in wealth, happiness, and spiritual satisfaction—starts now.</p>
                     <button class="nav-button bg-amber-400 hover:bg-amber-500 text-stone-800 font-bold py-3 px-8 rounded-lg text-lg transition duration-300" data-target="principles-hub">Start the Journey: Explore the 13 Principles</button>
+                </div>
+            </div>
+
+            <div id="dashboard" class="content-section">
+                <h2 class="text-3xl font-bold text-stone-800 mb-8">My Dashboard</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="bg-white p-8 rounded-lg shadow-lg">
+                            <h3 class="font-bold text-2xl mb-4 text-purple-600">My Definite Chief Aim</h3>
+                            <div id="dashboard-desire" class="text-stone-700 prose lg:prose-lg"></div>
+                        </div>
+                        <div class="bg-white p-8 rounded-lg shadow-lg">
+                             <h3 class="font-bold text-2xl mb-4 text-purple-600">My Action Plan</h3>
+                             <div id="dashboard-plan"></div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h3 class="font-bold text-2xl mb-4 text-purple-600">My Progress</h3>
+                        <div class="chart-container" style="height: 250px; max-height: 250px;"><canvas id="progressChart"></canvas></div>
+                        <div id="dashboard-faith" class="mt-8 text-stone-700 prose"></div>
+                    </div>
                 </div>
             </div>
 
@@ -194,26 +219,6 @@
                 <div id="alibi-list" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg max-w-4xl mx-auto"></div>
             </div>
 
-            <div id="blueprint" class="content-section">
-                 <div class="text-center mb-12">
-                     <h2 class="text-3xl font-bold text-stone-800">My Personal Success Blueprint</h2>
-                     <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">This is your personal headquarters for achievement. All the work you do throughout this interactive workshop will be summarized here. Revisit this page daily to keep your goals top-of-mind and track your progress.</p>
-                </div>
-                <div class="space-y-8 max-w-4xl mx-auto">
-                    <div class="bg-white p-8 rounded-lg shadow-lg">
-                        <h3 class="font-bold text-2xl mb-4 text-amber-600">My Definite Chief Aim</h3>
-                        <div id="blueprint-desire" class="text-stone-700 prose lg:prose-lg">
-                            <p class="italic">Loading your data...</p>
-                        </div>
-                    </div>
-                     <div class="bg-white p-8 rounded-lg shadow-lg">
-                        <h3 class="font-bold text-2xl mb-4 text-amber-600">My Self-Confidence Formula</h3>
-                        <div id="blueprint-faith" class="text-stone-700 prose lg:prose-lg">
-                             <p class="italic">Loading your data...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </main>
     </div>
 
@@ -248,17 +253,18 @@
     <script type="module">
         // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Main App Logic
         document.addEventListener('DOMContentLoaded', function() {
             // Firebase and App State
-            let db, auth, userId;
+            let db, auth, userId, userData;
             let isAuthReady = false;
+            let progressChartInstance = null;
 
             const appData = {
-                principles: [
+                 principles: [
                     { id: 'desire', name: 'Desire', tagline: 'The Turning Point of All Achievement' },
                     { id: 'faith', name: 'Faith', tagline: 'Visualizing and Believing in Attainment' },
                     { id: 'auto-suggestion', name: 'Auto-Suggestion', tagline: 'Influencing the Subconscious Mind' },
@@ -294,7 +300,7 @@
                             description: "To build faith, you must impress your subconscious mind with positive affirmations. Hill provides a five-step Self-Confidence Formula. Write out your own version of this formula below. Read it aloud once daily, and over time, it will develop in you the self-confidence to achieve any object.",
                             form: `
                                 <textarea id="faith-formula" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-amber-400 focus:ring focus:ring-amber-300 focus:ring-opacity-50" rows="8" placeholder="1. I know that I have the ability to achieve the object of my Definite Purpose in life... \n2. I realize the dominating thoughts of my mind will eventually reproduce themselves in outward, physical action...\n3. I know through the principle of auto-suggestion, any desire that I persistently hold in my mind will eventually seek expression... \n4. I have clearly written down a description of my definite chief aim in life...\n5. I fully realize that no wealth or position can long endure, unless built upon truth and justice..."></textarea>
-                                <button class="action-button mt-4 px-6 py-2 bg-amber-400 text-stone-800 font-bold rounded-lg hover:bg-amber-500" data-action="saveFaith">Save to My Blueprint</button>
+                                <button class="action-button mt-4 px-6 py-2 bg-amber-400 text-stone-800 font-bold rounded-lg hover:bg-amber-500" data-action="saveFaith">Save to My Dashboard</button>
                             `
                         }
                     },
@@ -347,24 +353,13 @@
                             description: "Effective plans require leadership. First, rate yourself on the 11 major attributes of leadership below. Then, build your action plan.",
                             form: `
                                 <h4 class="font-bold mb-2">Leadership Self-Assessment (1-10)</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div><label>Unwavering Courage:</label><input type="number" min="1" max="10" class="w-full mt-1"></div>
-                                    <div><label>Self-Control:</label><input type="number" min="1" max="10" class="w-full mt-1"></div>
-                                    <div><label>A Keen Sense of Justice:</label><input type="number" min="1" max="10" class="w-full mt-1"></div>
-                                    <div><label>Definiteness of Decision:</label><input type="number" min="1" max="10" class="w-full mt-1"></div>
-                                    <div><label>Definiteness of Plans:</label><input type="number" min="1" max="10" class="w-full mt-1"></div>
-                                    <div><label>Habit of Doing More Than Paid For:</label><input type="number" min="1" max="10" class="w-full mt-1"></div>
-                                    <div><label>A Pleasing Personality:</label><input type="number" min="1" max="10" class="w-full mt-1"></div>
-                                    <div><label>Sympathy and Understanding:</label><input type="number" min="1" max="10" class="w-full mt-1"></div>
-                                    <div><label>Mastery of Detail:</label><input type="number" min="1" max="10" class="w-full mt-1"></div>
-                                    <div><label>Willingness to Assume Full Responsibility:</label><input type="number" min="1" max="10" class="w-full mt-1"></div>
-                                    <div><label>Cooperation:</label><input type="number" min="1" max="10" class="w-full mt-1"></div>
-                                </div>
+                                <div id="leadership-sliders" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4"></div>
                                 <h4 class="font-bold mt-6 mb-2">Action Plan Builder</h4>
-                                <label class="block text-sm font-medium text-stone-700">My first milestone:</label>
-                                <input type="text" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" placeholder="e.g., Draft the business plan outline">
-                                <label class="block text-sm font-medium text-stone-700 mt-4">My second milestone:</label>
-                                <input type="text" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" placeholder="e.g., Research top 3 competitors">
+                                <div id="action-plan-container"></div>
+                                <div class="flex mt-4">
+                                    <input type="text" id="new-task-input" class="flex-grow rounded-l-md border-stone-300 shadow-sm" placeholder="Add a new action step...">
+                                    <button id="add-task-btn" class="bg-purple-600 text-white px-4 rounded-r-md hover:bg-purple-700">Add</button>
+                                </div>
                              `
                         }
                     },
@@ -526,14 +521,21 @@
                         if (user) {
                             userId = user.uid;
                             isAuthReady = true;
+                            document.getElementById('sign-out-btn').classList.remove('hidden');
                             loginOverlay.style.display = 'none';
                             showStatus(`Hi, ${user.displayName.split(' ')[0]}`, false);
-                            await loadBlueprintData(userId);
+                            await loadUserData(userId);
+                            setupLoggedInNav();
+                            navigate('dashboard');
                         } else {
                             isAuthReady = false;
                             userId = null;
+                            userData = null;
+                            document.getElementById('sign-out-btn').classList.add('hidden');
                             loginOverlay.style.display = 'flex';
                             showStatus("Not Connected", true);
+                            setupLoggedOutNav();
+                            navigate('home');
                         }
                     });
 
@@ -542,6 +544,15 @@
                     showStatus("Connection Failed", true);
                 }
             }
+            
+            async function handleSignOut() {
+                try {
+                    await signOut(auth);
+                } catch (error) {
+                    console.error("Sign Out Error", error);
+                }
+            }
+
 
             async function handleGoogleLogin() {
                 const provider = new GoogleAuthProvider();
@@ -564,7 +575,7 @@
                 }
             }
             
-            async function loadBlueprintData(uid) {
+            async function loadUserData(uid) {
                 if (!db || !uid) return;
                 
                 const appId = "think-and-grow-rich-workshop"; // Use a fixed App ID for public version
@@ -572,33 +583,36 @@
                 
                 try {
                     const docSnap = await getDoc(docRef);
-                    const blueprintDesireDiv = document.getElementById('blueprint-desire');
-                    const blueprintFaithDiv = document.getElementById('blueprint-faith');
-
                     if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        blueprintDesireDiv.innerHTML = data.desireStatement || '<p class="italic">You have not yet defined your Desire. Complete the exercise in the "Desire" principle to see it here.</p>';
-                        blueprintFaithDiv.innerHTML = data.faithFormula ? `<div class="prose lg:prose-lg">${data.faithFormula.split('\n').map(p => `<p>${p}</p>`).join('')}</div>` : '<p class="italic">You have not yet defined your Self-Confidence Formula. Complete the exercise in the "Faith" principle to see it here.</p>';
+                        userData = docSnap.data();
                     } else {
-                        blueprintDesireDiv.innerHTML = '<p class="italic">You have not yet defined your Desire. Complete the exercise in the "Desire" principle to see it here.</p>';
-                        blueprintFaithDiv.innerHTML = '<p class="italic">You have not yet defined your Self-Confidence Formula. Complete the exercise in the "Faith" principle to see it here.</p>';
+                        // Initialize with default structure if no data exists
+                        userData = {
+                            desireStatement: '',
+                            faithFormula: '',
+                            actionPlan: [],
+                            completedPrinciples: []
+                        };
                     }
+                    renderDashboard();
                 } catch (error) {
-                    console.error("Error loading blueprint data:", error);
+                    console.error("Error loading user data:", error);
                     showStatus("Load Failed", true);
                 }
             }
             
-             async function saveBlueprintData(dataToSave) {
+             async function saveUserData(dataToSave) {
                 if (!isAuthReady || !db || !userId) {
                     alert("Not connected to the database. Please sign in and try again.");
                     return;
                 }
                 showStatus("Saving...", false);
-                const appId = "think-and-grow-rich-workshop"; // Use a fixed App ID for public version
+                const appId = "think-and-grow-rich-workshop";
                 const docRef = doc(db, `artifacts/${appId}/users/${userId}/blueprint`, "data");
                 try {
-                    await setDoc(docRef, dataToSave, { merge: true });
+                    // Update local state first for responsiveness
+                    Object.assign(userData, dataToSave);
+                    await setDoc(docRef, userData, { merge: true });
                     showStatus("Saved!", false);
                 } catch (error) {
                     console.error("Error saving data: ", error);
@@ -609,6 +623,25 @@
 
 
             // --- UI and Navigation ---
+            function setupLoggedInNav() {
+                const navLinks = `
+                    <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="dashboard">Dashboard</a>
+                    <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="principles-hub">The 13 Principles</a>
+                    <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="workshop">The Workshop</a>
+                `;
+                document.getElementById('main-nav').innerHTML = navLinks;
+                document.getElementById('mobile-nav').innerHTML = navLinks.replace(/class="/g, 'class="block ');
+            }
+            
+            function setupLoggedOutNav() {
+                 const navLinks = `
+                    <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="home">Home</a>
+                    <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="principles-hub">The 13 Principles</a>
+                `;
+                 document.getElementById('main-nav').innerHTML = navLinks;
+                 document.getElementById('mobile-nav').innerHTML = navLinks.replace(/class="/g, 'class="block ');
+            }
+
             function navigate(targetId) {
                 document.querySelectorAll('.content-section').forEach(section => {
                     section.classList.remove('active');
@@ -632,6 +665,60 @@
                 window.scrollTo(0, 0);
                 mobileMenu.classList.add('hidden');
             }
+            
+            function renderDashboard() {
+                if (!userData) return;
+                const desireDiv = document.getElementById('dashboard-desire');
+                const faithDiv = document.getElementById('dashboard-faith');
+                const planDiv = document.getElementById('dashboard-plan');
+
+                desireDiv.innerHTML = userData.desireStatement || '<p class="italic">Define your Definite Chief Aim in the "Desire" module.</p>';
+                faithDiv.innerHTML = userData.faithFormula ? `<strong>My Self-Confidence Formula:</strong><div class="mt-2 text-sm italic">${userData.faithFormula.substring(0,150)}...</div>` : '<p class="italic">Create your Self-Confidence Formula in the "Faith" module.</p>';
+                
+                // Render Action Plan
+                let planHtml = '<p class="italic">No action plan created. Go to the "Organized Planning" module to start.</p>';
+                if(userData.actionPlan && userData.actionPlan.length > 0) {
+                    planHtml = '<ul class="space-y-2">';
+                    userData.actionPlan.forEach((task, index) => {
+                        planHtml += `
+                         <li class="flex items-center task-item ${task.completed ? 'completed' : ''}" data-task-index="${index}">
+                            <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500" ${task.completed ? 'checked' : ''}>
+                            <span class="ml-3 text-stone-700">${task.text}</span>
+                        </li>`;
+                    });
+                    planHtml += '</ul>';
+                }
+                planDiv.innerHTML = planHtml;
+
+
+                // Render Progress Chart
+                const completedCount = userData.completedPrinciples?.length || 0;
+                const totalPrinciples = appData.principles.length;
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                if(progressChartInstance) progressChartInstance.destroy();
+                progressChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Completed', 'Remaining'],
+                        datasets: [{
+                            data: [completedCount, totalPrinciples - completedCount],
+                            backgroundColor: ['#9333ea', '#e5e7eb'],
+                            borderColor: '#ffffff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        }
+                    }
+                });
+
+            }
 
             function renderPrincipleDetail(principleId) {
                 const contentArea = document.getElementById('principle-content-area');
@@ -648,7 +735,7 @@
                         <div class="mt-8 pt-6 border-t border-stone-200">
                             <h3 class="text-xl font-bold text-amber-600 mb-2">${principleData.practice.title}</h3>
                             <p class="text-stone-600 mb-4">${principleData.practice.description}</p>
-                            ${principleData.practice.buttonText ? `<button class="action-button bg-amber-400 hover:bg-amber-500 text-stone-800 font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}">${principleData.practice.buttonText}</button>` : ''}
+                            ${principleData.practice.buttonText ? `<button class="action-button bg-amber-400 hover:bg-amber-500 text-stone-800 font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}" data-principle="${principleId}">${principleData.practice.buttonText}</button>` : ''}
                             ${principleData.practice.form ? principleData.practice.form : ''}
                         </div>
                     `;
@@ -668,6 +755,11 @@
                          link.classList.add('active');
                      }
                 });
+
+                if (principleId === 'organized-planning') {
+                    renderActionPlan();
+                    renderLeadershipSliders();
+                }
             }
             
             function openDesireModal() {
@@ -699,12 +791,13 @@
                     <p>I am awaiting a plan by which to accumulate this money, and I will follow that plan, when it is received. My plan is as follows: <strong>${plan}</strong></p>
                 `;
                 
-                await saveBlueprintData({ desireStatement: statementHTML });
-                document.getElementById('blueprint-desire').innerHTML = statementHTML;
+                await markPrincipleComplete('desire');
+                await saveUserData({ desireStatement: statementHTML });
+                renderDashboard();
                 
                 closeDesireModal();
                 alert('Your Desire Statement has been saved!');
-                navigate('blueprint');
+                navigate('dashboard');
             }
             
             async function handleSaveFaithFormula() {
@@ -713,15 +806,89 @@
                     alert('Please write your Self-Confidence Formula.');
                     return;
                 }
-
-                await saveBlueprintData({ faithFormula: formulaText });
                 
-                const blueprintDiv = document.getElementById('blueprint-faith');
-                blueprintDiv.innerHTML = `<div class="prose lg:prose-lg">${formulaText.split('\n').map(p => `<p>${p}</p>`).join('')}</div>`;
+                await markPrincipleComplete('faith');
+                await saveUserData({ faithFormula: formulaText });
+                renderDashboard();
                 alert('Your Self-Confidence Formula has been saved!');
-                navigate('blueprint');
+                navigate('dashboard');
             }
             
+            // --- Interactive Exercises ---
+
+            function renderLeadershipSliders() {
+                const container = document.getElementById('leadership-sliders');
+                if (!container) return;
+                const attributes = ["Unwavering Courage", "Self-Control", "A Keen Sense of Justice", "Definiteness of Decision", "Definiteness of Plans", "Habit of Doing More Than Paid For", "A Pleasing Personality", "Sympathy and Understanding", "Mastery of Detail", "Willingness to Assume Full Responsibility", "Cooperation"];
+                let html = '';
+                attributes.forEach(attr => {
+                    html += `<div><label class="block text-sm font-medium text-stone-700">${attr}:</label><input type="range" min="1" max="10" value="5" class="w-full mt-1"></div>`;
+                });
+                container.innerHTML = html;
+            }
+
+            function renderActionPlan() {
+                const container = document.getElementById('action-plan-container');
+                if (!container) return;
+                let planHtml = '<p class="italic text-center text-stone-500">No action steps yet. Add your first one below!</p>';
+                if(userData?.actionPlan && userData.actionPlan.length > 0) {
+                    planHtml = '<ul class="space-y-3">';
+                    userData.actionPlan.forEach((task, index) => {
+                         planHtml += `
+                         <li class="flex items-center task-item p-2 rounded-md ${task.completed ? 'completed bg-stone-100' : 'bg-white'}" data-task-index="${index}">
+                            <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" ${task.completed ? 'checked' : ''}>
+                            <span class="ml-3 text-stone-800 flex-grow">${task.text}</span>
+                            <button class="delete-task-btn text-gray-400 hover:text-red-500 text-lg">&times;</button>
+                        </li>`;
+                    });
+                    planHtml += '</ul>';
+                }
+                container.innerHTML = planHtml;
+            }
+
+            async function handleActionPlanUpdate() {
+                 await markPrincipleComplete('organized-planning');
+                 await saveUserData({ actionPlan: userData.actionPlan });
+                 renderActionPlan();
+                 renderDashboard();
+            }
+
+            function handleAddTask() {
+                const input = document.getElementById('new-task-input');
+                if (input && input.value.trim() !== "") {
+                    if (!userData.actionPlan) userData.actionPlan = [];
+                    userData.actionPlan.push({ text: input.value.trim(), completed: false });
+                    input.value = "";
+                    handleActionPlanUpdate();
+                }
+            }
+            
+            function handleToggleTask(index) {
+                if(userData?.actionPlan[index]) {
+                    userData.actionPlan[index].completed = !userData.actionPlan[index].completed;
+                    handleActionPlanUpdate();
+                }
+            }
+
+            function handleDeleteTask(index) {
+                if(userData?.actionPlan[index]) {
+                    userData.actionPlan.splice(index, 1);
+                    handleActionPlanUpdate();
+                }
+            }
+
+
+            async function markPrincipleComplete(principleId) {
+                if (!userData.completedPrinciples) {
+                    userData.completedPrinciples = [];
+                }
+                if (!userData.completedPrinciples.includes(principleId)) {
+                    userData.completedPrinciples.push(principleId);
+                    await saveUserData({ completedPrinciples: userData.completedPrinciples });
+                }
+            }
+
+
             // --- Workshop Tools ---
             function startFearQuiz() {
                 currentFearQuizQuestion = 0;
@@ -880,6 +1047,20 @@
                         if (action === 'saveFaith') handleSaveFaithFormula();
                     }
                     
+                    if (e.target.id === 'add-task-btn') {
+                        handleAddTask();
+                    }
+
+                    if (e.target.closest('.task-item')) {
+                        const taskItem = e.target.closest('.task-item');
+                        const index = parseInt(taskItem.dataset.taskIndex);
+                        if(e.target.classList.contains('delete-task-btn')) {
+                            handleDeleteTask(index);
+                        } else {
+                            handleToggleTask(index);
+                        }
+                    }
+
                     handleFearAnswer(e);
 
                     const alibiItem = e.target.closest('.alibi-item');
@@ -893,12 +1074,13 @@
                 document.getElementById('close-desire-modal').addEventListener('click', closeDesireModal);
                 document.getElementById('desire-modal-backdrop').addEventListener('click', closeDesireModal);
                 googleLoginBtn.addEventListener('click', handleGoogleLogin);
+                document.getElementById('sign-out-btn').addEventListener('click', handleSignOut);
+
 
                 mobileMenuButton.addEventListener('click', () => {
                     mobileMenu.classList.toggle('hidden');
                 });
                 
-                navigate('home');
             }
             
             // --- Run App ---
