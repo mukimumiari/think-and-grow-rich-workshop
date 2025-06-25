@@ -170,7 +170,7 @@
             </div>
 
             <div id="dashboard" class="content-section">
-                <div class="flex justify-between items-center mb-8">
+                <div class="flex justify-between items-start mb-8">
                      <h2 id="dashboard-greeting" class="text-3xl font-bold text-stone-800">My Dashboard</h2>
                      <div id="dashboard-progress-summary" class="text-right"></div>
                 </div>
@@ -193,6 +193,9 @@
                         <h3 class="font-bold text-2xl mb-4 text-purple-600">My Progress</h3>
                         <div class="chart-container" style="height: 250px; max-height: 250px;"><canvas id="progressChart"></canvas></div>
                         <div id="dashboard-faith" class="mt-8 text-stone-700 prose max-w-none"></div>
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                             <button id="reset-progress-btn" class="w-full text-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">Reset All Progress</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -257,6 +260,16 @@
             </div>
         </form>
     </div>
+    
+    <div id="reset-confirm-modal" class="modal bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
+        <h3 class="text-2xl font-bold mb-4">Reset Progress?</h3>
+        <p class="text-sm text-stone-600 mb-6">This will clear your saved work for this principle and all subsequent principles. Are you sure you want to continue?</p>
+        <div class="flex justify-end gap-4 mt-6">
+                <button id="cancel-reset-btn" class="px-4 py-2 bg-stone-200 text-stone-800 rounded-lg hover:bg-stone-300">Cancel</button>
+                <button id="confirm-reset-btn" class="px-4 py-2 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600">Yes, Reset</button>
+        </div>
+    </div>
+
 
     <script type="module">
         // Firebase Imports
@@ -636,6 +649,18 @@
                     alert("There was an error saving your data. Please check the console for details.");
                 }
             }
+            
+            async function handleResetProgress() {
+                const initialData = {
+                    desireData: null,
+                    faithFormula: '',
+                    actionPlan: [],
+                    completedPrinciples: []
+                };
+                await saveUserData(initialData);
+                renderDashboard();
+                navigate('dashboard');
+            }
 
 
             // --- UI and Navigation ---
@@ -809,7 +834,11 @@
                             <p class="font-bold">Principle Mastered!</p>
                             <p>You have completed the core exercise for this principle. You can review your work on the Dashboard or choose to modify it.</p>
                         </div>
-                        <button class="action-button mt-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition" data-action="modify" data-principle-id="${principleId}">Modify</button>`;
+                        <div class="flex items-center gap-4 mt-4">
+                           <button class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition" data-action="modify" data-principle-id="${principleId}">Modify</button>
+                           <button class="action-button text-sm text-red-500 hover:text-red-700" data-action="confirmReset" data-principle-id="${principleId}">Reset From Here</button>
+                        </div>
+                        `;
                     }
                     else if (principleData.practice.buttonText) {
                          const buttonText = (principleId === 'desire' && (userData?.desireData || userData?.desireStatement)) ? "Modify My Desire" : principleData.practice.buttonText;
@@ -879,6 +908,11 @@
                 document.getElementById('desire-modal-backdrop').style.display = 'none';
                 document.getElementById('desire-modal').style.display = 'none';
             }
+            
+            function closeResetModal() {
+                document.getElementById('reset-confirm-modal').style.display = 'none';
+                document.getElementById('desire-modal-backdrop').style.display = 'none';
+            }
 
             async function handleDesireFormSubmit(e) {
                 e.preventDefault();
@@ -894,11 +928,10 @@
                     return;
                 }
                 
-                const completed = userData.completedPrinciples ? [...userData.completedPrinciples] : [];
-                if (!completed.includes('desire')) {
-                     completed.push('desire');
+                if (!userData.completedPrinciples.includes('desire')) {
+                     userData.completedPrinciples.push('desire');
                 }
-                await saveUserData({ desireData: desireData, desireStatement: null, completedPrinciples: completed });
+                await saveUserData({ desireData: desireData, desireStatement: null, completedPrinciples: userData.completedPrinciples });
                 renderDashboard();
                 
                 closeDesireModal();
@@ -913,11 +946,10 @@
                     return;
                 }
                 
-                const completed = userData.completedPrinciples ? [...userData.completedPrinciples] : [];
-                if (!completed.includes('faith')) {
-                    completed.push('faith');
+                if (!userData.completedPrinciples.includes('faith')) {
+                    userData.completedPrinciples.push('faith');
                 }
-                await saveUserData({ faithFormula: formulaText, completedPrinciples: completed });
+                await saveUserData({ faithFormula: formulaText, completedPrinciples: userData.completedPrinciples });
                 renderDashboard();
                 alert('Your Self-Confidence Formula has been saved!');
                 navigate('dashboard');
@@ -1140,6 +1172,14 @@
                     if (navButton && navButton.dataset.target) {
                         e.preventDefault();
                         if(navButton.dataset.target === 'fear-diagnostic') startFearQuiz();
+                        if(navButton.dataset.target.startsWith("principles-")) {
+                            const principleId = navButton.dataset.target.replace('principles-','');
+                            const principleIndex = appData.principles.findIndex(p => p.id === principleId);
+                            const completedCount = userData?.completedPrinciples?.length || 0;
+                            if(principleIndex > completedCount && auth.currentUser) {
+                                return; // Do nothing if chapter is locked
+                            }
+                        }
                         navigate(navButton.dataset.target);
                     }
                     
@@ -1149,6 +1189,13 @@
                         if (action === 'openDesireModal') openDesireModal();
                         if (action === 'saveFaith') handleSaveFaithFormula();
                         if (action === 'modify') handleModify(actionButton.dataset.principleId);
+                        if (action === 'confirmReset') {
+                           const modal = document.getElementById('reset-confirm-modal');
+                           const confirmBtn = document.getElementById('confirm-reset-btn');
+                           confirmBtn.dataset.principleId = actionButton.dataset.principleId;
+                           document.getElementById('desire-modal-backdrop').style.display = 'block';
+                           modal.style.display = 'block';
+                        }
                     }
                     
                     if (e.target.id === 'add-task-btn') {
@@ -1173,10 +1220,24 @@
                         antidote.classList.toggle('hidden');
                     }
                 });
+                
+                document.getElementById('reset-progress-btn').addEventListener('click', () => {
+                    if(confirm("Are you sure you want to reset ALL your progress? This cannot be undone.")) {
+                       handleResetProgress();
+                    }
+                });
 
                 document.getElementById('desire-form').addEventListener('submit', handleDesireFormSubmit);
                 document.getElementById('close-desire-modal').addEventListener('click', closeDesireModal);
                 document.getElementById('desire-modal-backdrop').addEventListener('click', closeDesireModal);
+                
+                const resetModal = document.getElementById('reset-confirm-modal');
+                document.getElementById('cancel-reset-btn').addEventListener('click', () => resetModal.style.display = 'none');
+                document.getElementById('confirm-reset-btn').addEventListener('click', (e) => {
+                    handleResetFromPrinciple(e.target.dataset.principleId);
+                    resetModal.style.display = 'none';
+                });
+
                 googleLoginBtn.addEventListener('click', handleGoogleLogin);
                 document.getElementById('sign-out-btn').addEventListener('click', handleSignOut);
 
