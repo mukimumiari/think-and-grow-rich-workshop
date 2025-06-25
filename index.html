@@ -788,7 +788,7 @@
                 });
             }
 
-            function renderPrincipleDetail(principleId) {
+            function renderPrincipleDetail(principleId, forceShowForm = false) {
                 const contentArea = document.getElementById('principle-content-area');
                 const principleData = appData.content.find(p => p.id === principleId);
 
@@ -804,7 +804,7 @@
                     // Check if the practice for this principle has been completed
                     const isCompleted = userData?.completedPrinciples?.includes(principleId);
 
-                    if (isCompleted && principleData.practice.form) {
+                    if (isCompleted && principleData.practice.form && !forceShowForm) {
                          practiceContent = `<div class="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg">
                             <p class="font-bold">Principle Mastered!</p>
                             <p>You have completed the core exercise for this principle. You can review your work on the Dashboard or choose to modify it.</p>
@@ -847,29 +847,17 @@
                     renderLeadershipSliders();
                 }
 
-                // Pre-fill faith formula if it's the initial render of the form
-                if(principleId === 'faith' && !isCompleted) {
+                // Pre-fill faith formula if it's the initial render or modify render of the form
+                if(principleId === 'faith' && (forceShowForm || !isCompleted)) {
                     const faithTextarea = document.getElementById('faith-formula');
-                    if(faithTextarea && userData?.faithFormula) {
-                        faithTextarea.value = userData.faithFormula;
+                    if(faithTextarea) {
+                        faithTextarea.value = userData.faithFormula || '';
                     }
                 }
             }
             
             function handleModify(principleId) {
-                const principleData = appData.content.find(p => p.id === principleId);
-                if (!principleData || !principleData.practice) return;
-
-                const practiceContainer = document.querySelector(`[data-principle-id="${principleId}"]`).parentElement;
-                practiceContainer.innerHTML = principleData.practice.form;
-
-                if (principleId === 'faith') {
-                    const formulaTextarea = document.getElementById('faith-formula');
-                    if (formulaTextarea) {
-                        formulaTextarea.value = userData.faithFormula || '';
-                    }
-                    practiceContainer.querySelector('[data-action="saveFaith"]').addEventListener('click', handleSaveFaithFormula);
-                }
+                renderPrincipleDetail(principleId, true); // Add a 'forceShowForm' flag
             }
 
             function openDesireModal() {
@@ -908,8 +896,10 @@
                     return;
                 }
                 
-                await markPrincipleComplete('desire');
-                await saveUserData({ desireData: desireData, desireStatement: null }); // Save new format, nullify old one
+                if (!userData.completedPrinciples.includes('desire')) {
+                     userData.completedPrinciples.push('desire');
+                }
+                await saveUserData({ desireData: desireData, desireStatement: null, completedPrinciples: userData.completedPrinciples });
                 renderDashboard();
                 
                 closeDesireModal();
@@ -924,8 +914,10 @@
                     return;
                 }
                 
-                await markPrincipleComplete('faith');
-                await saveUserData({ faithFormula: formulaText });
+                if (!userData.completedPrinciples.includes('faith')) {
+                    userData.completedPrinciples.push('faith');
+                }
+                await saveUserData({ faithFormula: formulaText, completedPrinciples: userData.completedPrinciples });
                 renderDashboard();
                 alert('Your Self-Confidence Formula has been saved!');
                 navigate('dashboard');
@@ -975,8 +967,10 @@
             }
 
             async function handleActionPlanUpdate() {
-                 await markPrincipleComplete('organized-planning');
-                 await saveUserData({ actionPlan: userData.actionPlan });
+                 if (!userData.completedPrinciples.includes('organized-planning')) {
+                    userData.completedPrinciples.push('organized-planning');
+                 }
+                 await saveUserData({ actionPlan: userData.actionPlan, completedPrinciples: userData.completedPrinciples });
                  renderActionPlan();
                  renderDashboard();
             }
@@ -1002,17 +996,6 @@
                 if(userData?.actionPlan[index]) {
                     userData.actionPlan.splice(index, 1);
                     handleActionPlanUpdate();
-                }
-            }
-
-
-            async function markPrincipleComplete(principleId) {
-                if (!userData.completedPrinciples) {
-                    userData.completedPrinciples = [];
-                }
-                if (!userData.completedPrinciples.includes(principleId)) {
-                    userData.completedPrinciples.push(principleId);
-                    await saveUserData({ completedPrinciples: userData.completedPrinciples });
                 }
             }
 
