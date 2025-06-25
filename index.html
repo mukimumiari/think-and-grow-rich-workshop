@@ -92,10 +92,10 @@
                     </div>
                     <div class="hidden md:block">
                         <div class="ml-10 flex items-baseline space-x-4">
-                            <a href="#" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-target="home">Home</a>
-                            <a href="#" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-target="principles-hub">The 13 Principles</a>
-                            <a href="#" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-target="workshop">The Workshop</a>
-                            <a href="#" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-target="blueprint">My Blueprint</a>
+                            <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="home">Home</a>
+                            <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="principles-hub">The 13 Principles</a>
+                            <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="workshop">The Workshop</a>
+                            <a href="#" class="nav-link nav-button px-3 py-2 rounded-md text-sm font-medium" data-target="blueprint">My Blueprint</a>
                         </div>
                     </div>
                      <div id="status-indicator" class="text-sm text-gray-500 opacity-0">
@@ -112,10 +112,10 @@
             </nav>
             <div id="mobile-menu" class="md:hidden hidden">
                 <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                    <a href="#" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-target="home">Home</a>
-                    <a href="#" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-target="principles-hub">The 13 Principles</a>
-                    <a href="#" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-target="workshop">The Workshop</a>
-                    <a href="#" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-target="blueprint">My Blueprint</a>
+                    <a href="#" class="nav-link nav-button block px-3 py-2 rounded-md text-base font-medium" data-target="home">Home</a>
+                    <a href="#" class="nav-link nav-button block px-3 py-2 rounded-md text-base font-medium" data-target="principles-hub">The 13 Principles</a>
+                    <a href="#" class="nav-link nav-button block px-3 py-2 rounded-md text-base font-medium" data-target="workshop">The Workshop</a>
+                    <a href="#" class="nav-link nav-button block px-3 py-2 rounded-md text-base font-medium" data-target="blueprint">My Blueprint</a>
                 </div>
             </div>
         </header>
@@ -486,29 +486,15 @@
             // --- Firebase Setup ---
             async function setupFirebase() {
                 try {
-                    // Replace this with your own config from the Firebase console!
-const firebaseConfig = {
-  apiKey: "AIzaSyCMeBuLbXz3W23IbfwWU8e-yS7Km8Akeao",
-  authDomain: "think-and-grow-rich-dba8e.firebaseapp.com",
-  projectId: "think-and-grow-rich-dba8e",
-  storageBucket: "think-and-grow-rich-dba8e.firebasestorage.app",
-  messagingSenderId: "164639324890",
-  appId: "1:164639324890:web:e5a281464fd372771f43e3",
-  measurementId: "G-93BB2G344V"
-};
-
-                    // A check to see if the user has replaced the placeholder config
-                    if (firebaseConfig.apiKey === "YOUR_API_KEY") {
-                        const internalConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-                         if(internalConfig) {
-                             Object.assign(firebaseConfig, internalConfig);
-                         } else {
-                            showStatus("Firebase Not Configured", true);
-                            loginOverlay.innerHTML = `<div class="text-center bg-white p-12 rounded-lg shadow-2xl max-w-md"><h2 class="text-2xl font-bold text-red-600 mb-4">Configuration Needed</h2><p class="text-stone-600">This app requires Firebase configuration. Please follow the instructions to set it up for public hosting.</p></div>`
-                            loginOverlay.style.display = 'flex';
-                            return;
-                         }
-                    }
+                    // This is your user-provided Firebase configuration
+                    const firebaseConfig = {
+                        apiKey: "AIzaSyCMeBuLbXz3W23IbfwWU8e-yS7Km8Akeao",
+                        authDomain: "think-and-grow-rich-dba8e.firebaseapp.com",
+                        projectId: "think-and-grow-rich-dba8e",
+                        storageBucket: "think-and-grow-rich-dba8e.appspot.com",
+                        messagingSenderId: "164639324890",
+                        appId: "1:164639324890:web:e5a281464fd372771f43e3"
+                    };
                     
                     const app = initializeApp(firebaseConfig);
                     db = getFirestore(app);
