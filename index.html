@@ -12,35 +12,35 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
+            background-color: #F8F7F4; /* Softer off-white */
         }
         h1, h2, h3, h4, .font-serif {
             font-family: 'Lora', serif;
         }
         .content-section {
             display: none;
-            animation: fadeIn 0.5s;
+            animation: fadeIn 0.5s ease-in-out;
         }
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .content-section.active {
             display: block;
         }
         .sidebar-link.active {
-            background-color: #FBBF24;
-            color: #44403C;
+            background-color: #D6A354;
+            color: #ffffff;
             font-weight: 600;
         }
         .modal-backdrop {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
             z-index: 40;
+            animation: fadeIn 0.3s;
         }
         .modal {
             display: none;
@@ -49,45 +49,64 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 50;
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 400px;
-            max-height: 50vh;
-        }
-        #status-indicator {
-            transition: opacity 0.5s ease-in-out;
+            animation: fadeIn 0.3s;
         }
         #login-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background-color: rgba(245, 245, 244, 0.95);
+            background-color: #F8F7F4;
             z-index: 100;
         }
         .prose strong { color: #A855F7; }
-        .prose blockquote { border-left-color: #FBBF24; }
+        .prose blockquote { 
+            border-left-color: #D6A354; 
+            background-color: #FDFBF7;
+            padding: 1rem;
+            font-style: italic;
+        }
         .task-item.completed span {
             text-decoration: line-through;
             color: #9ca3af;
         }
+        .principle-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .principle-card .completion-check {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #16a34a;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+         .principle-card.completed .completion-check {
+            opacity: 1;
+            transform: scale(1);
+        }
     </style>
 </head>
-<body class="bg-stone-100 text-stone-800">
-    <!-- Chosen Palette: Warm Harmony -->
+<body class="bg-stone-50 text-stone-800">
+    <!-- Chosen Palette: Refined Gold & Purple -->
     <!-- Application Structure Plan: A dashboard-centric, guided journey. Post-login, the user lands on a personal Dashboard summarizing their core mission (Definite Chief Aim) and progress. This immediately grounds them in their own data. The main navigation allows exploration of the 13 Principles (the curriculum) and diagnostic Workshop tools. This separates learning from doing and reviewing, creating a clear, motivating user flow that prioritizes personal application over simple content consumption. -->
     <!-- Visualization & Content Choices: 1. **Dashboard Progress**: Goal: Motivate/Inform. Method: Circular Progress Chart (Chart.js Doughnut). Interaction: Visual feedback. Justification: Provides an immediate, gamified overview of the user's journey completion, encouraging further engagement. 2. **Action Plan**: Goal: Practice/Track. Method: Interactive To-Do List. Interaction: Add, check-off tasks. Justification: Transforms a static planning exercise into a dynamic, actionable tool that saves progress, making the principle of Organized Planning tangible. 3. **Fear Diagnostic**: Goal: Diagnose/Compare. Method: Quiz feeding a Bar Chart (Chart.js). Justification: A bar chart gives a quick, clear comparison of the user's "fears," making the abstract concept personal and measurable. 4. **Leadership Self-Assessment**: Goal: Self-reflection. Method: Range sliders. Interaction: User rates themselves. Justification: More interactive and visually engaging than simple number inputs, encouraging more thoughtful self-assessment. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
-    <div id="login-overlay" class="flex items-center justify-center">
-        <div class="text-center bg-white p-12 rounded-lg shadow-2xl">
+    <div id="login-overlay" class="flex items-center justify-center p-4">
+        <div class="text-center bg-white p-8 sm:p-12 rounded-lg shadow-2xl max-w-md w-full">
             <h2 class="text-3xl font-bold text-stone-800 mb-4">Welcome to Your Workshop</h2>
-            <p class="text-lg text-stone-600 mb-8">Sign in with Google to save your progress and access your personal blueprint.</p>
-            <button id="google-login-btn" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+            <p class="text-lg text-stone-600 mb-8">Sign in with Google to save your progress and build your legacy.</p>
+            <button id="google-login-btn" class="inline-flex items-center justify-center w-full px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
                 <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48px" height="48px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.089,5.571l6.19,5.238C44.572,36.833,48,31.145,48,24C48,22.659,47.862,21.35,47.611,20.083z"></path></svg>
                 Sign in with Google
             </button>
@@ -95,14 +114,14 @@
     </div>
     
     <div id="app" class="min-h-screen flex flex-col">
-        <header class="bg-white shadow-md sticky top-0 z-30">
+        <header class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-30">
             <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
                     <div class="flex-shrink-0">
                         <h1 class="text-2xl font-bold text-stone-700">Think & Grow Rich</h1>
                     </div>
                     <div class="hidden md:block">
-                        <div id="main-nav" class="ml-10 flex items-baseline space-x-4">
+                        <div id="main-nav" class="ml-10 flex items-baseline space-x-1">
                             <!-- Nav links will be injected here -->
                         </div>
                     </div>
@@ -132,7 +151,7 @@
                     <h2 class="text-4xl font-bold text-stone-800 mb-4">"Whatever the Mind Can Conceive and Believe, It Can Achieve."</h2>
                     <p class="text-lg text-stone-600 max-w-3xl mx-auto mb-6">Welcome to the interactive workshop for Napoleon Hill's timeless classic, *Think and Grow Rich*. This is not just a book to be read; it's a philosophy to be lived. This digital experience is designed to help you move beyond passive reading into active practice. Here, you will find tools and exercises to help you define your desires, build unshakeable faith, and create actionable plans to transform your dreams into reality.</p>
                     <p class="text-lg text-stone-600 max-w-3xl mx-auto mb-8">Begin your journey by exploring the 13 Principles, diagnose your mental obstacles in The Workshop, and build your personal success plan in your Dashboard. Your journey to riches—in wealth, happiness, and spiritual satisfaction—starts now.</p>
-                    <button class="nav-button bg-amber-400 hover:bg-amber-500 text-stone-800 font-bold py-3 px-8 rounded-lg text-lg transition duration-300" data-target="principles-hub">Start the Journey: Explore the 13 Principles</button>
+                    <button class="nav-button bg-amber-400 hover:bg-amber-500 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" data-target="principles-hub">Start the Journey: Explore the 13 Principles</button>
                 </div>
             </div>
 
@@ -143,6 +162,10 @@
                         <div class="bg-white p-8 rounded-lg shadow-lg">
                             <h3 class="font-bold text-2xl mb-4 text-purple-600">My Definite Chief Aim</h3>
                             <div id="dashboard-desire" class="text-stone-700 prose lg:prose-lg"></div>
+                        </div>
+                         <div class="bg-gradient-to-r from-purple-600 to-blue-500 text-white p-8 rounded-lg shadow-lg">
+                            <h3 class="font-bold text-2xl mb-2">Focus for Today</h3>
+                            <div id="daily-focus" class="text-lg"></div>
                         </div>
                         <div class="bg-white p-8 rounded-lg shadow-lg">
                              <h3 class="font-bold text-2xl mb-4 text-purple-600">My Action Plan</h3>
@@ -184,15 +207,15 @@
                      <p class="mt-4 text-lg text-stone-600 max-w-3xl mx-auto">Success is an inside job. Before you can build a fortune, you must fortify your mind against the internal enemies that lead to failure: fear and indecision. Use these diagnostic tools to identify your personal obstacles and learn how to overcome them.</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                         <h3 class="text-2xl font-bold mb-4">Outwit the Six Ghosts of Fear</h3>
                         <p class="mb-6">Fear is just a state of mind. Hill identified six basic fears that hold people back from success. Take this diagnostic to identify which "ghosts" are haunting you, and learn the principles to banish them for good.</p>
-                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-stone-800 font-bold py-2 px-6 rounded-lg transition duration-300" data-target="fear-diagnostic">Start Fear Diagnostic</button>
+                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded-lg transition duration-300">Start Fear Diagnostic</button>
                     </div>
-                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                         <h3 class="text-2xl font-bold mb-4">Banish the 57 Famous Alibis</h3>
                         <p class="mb-6">"If I only had..." Alibis are the excuses we create to justify our lack of achievement. Recognizing them is the first step to eliminating them. Explore the list of 57 common alibis and discover how to stop making excuses and start making progress.</p>
-                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-stone-800 font-bold py-2 px-6 rounded-lg transition duration-300" data-target="alibi-buster">Explore the Alibis</button>
+                        <button class="nav-button bg-amber-400 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded-lg transition duration-300">Explore the Alibis</button>
                     </div>
                 </div>
             </div>
@@ -245,7 +268,7 @@
             </div>
             <div class="flex justify-end gap-4 mt-6">
                 <button type="button" id="close-desire-modal" class="px-4 py-2 bg-stone-200 text-stone-800 rounded-lg hover:bg-stone-300">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-amber-400 text-stone-800 font-bold rounded-lg hover:bg-amber-500">Create My Statement</button>
+                <button type="submit" class="px-4 py-2 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600">Create My Statement</button>
             </div>
         </form>
     </div>
@@ -300,7 +323,7 @@
                             description: "To build faith, you must impress your subconscious mind with positive affirmations. Hill provides a five-step Self-Confidence Formula. Write out your own version of this formula below. Read it aloud once daily, and over time, it will develop in you the self-confidence to achieve any object.",
                             form: `
                                 <textarea id="faith-formula" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-amber-400 focus:ring focus:ring-amber-300 focus:ring-opacity-50" rows="8" placeholder="1. I know that I have the ability to achieve the object of my Definite Purpose in life... \n2. I realize the dominating thoughts of my mind will eventually reproduce themselves in outward, physical action...\n3. I know through the principle of auto-suggestion, any desire that I persistently hold in my mind will eventually seek expression... \n4. I have clearly written down a description of my definite chief aim in life...\n5. I fully realize that no wealth or position can long endure, unless built upon truth and justice..."></textarea>
-                                <button class="action-button mt-4 px-6 py-2 bg-amber-400 text-stone-800 font-bold rounded-lg hover:bg-amber-500" data-action="saveFaith">Save to My Dashboard</button>
+                                <button class="action-button mt-4 px-6 py-2 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600" data-action="saveFaith">Save to My Dashboard</button>
                             `
                         }
                     },
@@ -660,14 +683,16 @@
                 }
 
                 document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('bg-stone-200', 'text-stone-900');
+                    link.classList.remove('bg-amber-400', 'text-white');
                 });
-                 document.querySelector(`.nav-link[data-target="${targetId}"]`)?.classList.add('bg-stone-200', 'text-stone-900');
+                 document.querySelector(`.nav-link[data-target="${targetId}"]`)?.classList.add('bg-amber-400', 'text-white');
 
                 if (targetId.startsWith('principles-') && targetId !== 'principles-hub') {
                     document.getElementById('principles-detail-view').classList.add('active');
                     const principleId = targetId.replace('principles-', '');
                     renderPrincipleDetail(principleId);
+                } else if (targetId === 'principles-hub') {
+                    renderPrincipleGrid();
                 }
                 
                 window.scrollTo(0, 0);
@@ -679,11 +704,14 @@
                 const desireDiv = document.getElementById('dashboard-desire');
                 const faithDiv = document.getElementById('dashboard-faith');
                 const planDiv = document.getElementById('dashboard-plan');
+                const focusDiv = document.getElementById('daily-focus');
 
                 desireDiv.innerHTML = userData.desireStatement || '<p class="italic">Define your Definite Chief Aim in the "Desire" module.</p>';
                 faithDiv.innerHTML = userData.faithFormula ? `<strong>My Self-Confidence Formula:</strong><div class="mt-2 text-sm italic">${userData.faithFormula.substring(0,150)}...</div>` : '<p class="italic">Create your Self-Confidence Formula in the "Faith" module.</p>';
                 
-                // Render Action Plan
+                let randomPrinciple = appData.principles[Math.floor(Math.random()*appData.principles.length)];
+                focusDiv.innerHTML = `Principle #${randomPrinciple.id}: <strong>${randomPrinciple.name}</strong> - ${randomPrinciple.tagline}`;
+
                 let planHtml = '<p class="italic">No action plan created. Go to the "Organized Planning" module to start.</p>';
                 if(userData.actionPlan && userData.actionPlan.length > 0) {
                     planHtml = '<ul class="space-y-2">';
@@ -699,7 +727,6 @@
                 planDiv.innerHTML = planHtml;
 
 
-                // Render Progress Chart
                 const completedCount = userData.completedPrinciples?.length || 0;
                 const totalPrinciples = appData.principles.length;
                 const ctx = document.getElementById('progressChart').getContext('2d');
@@ -712,7 +739,7 @@
                             data: [completedCount, totalPrinciples - completedCount],
                             backgroundColor: ['#9333ea', '#e5e7eb'],
                             borderColor: '#ffffff',
-                            borderWidth: 2
+                            borderWidth: 4
                         }]
                     },
                     options: {
@@ -726,6 +753,25 @@
                     }
                 });
 
+            }
+            
+            function renderPrincipleGrid() {
+                 const principlesGrid = document.getElementById('principles-grid');
+                 principlesGrid.innerHTML = '';
+                 appData.principles.forEach((p, index) => {
+                    const isCompleted = userData?.completedPrinciples?.includes(p.id);
+                    const gridCard = `
+                        <div class="nav-button principle-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 ${isCompleted ? 'completed' : ''}" data-target="principles-${p.id}">
+                            <div class="completion-check"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div>
+                            <div class="flex items-center mb-2">
+                                <span class="text-amber-500 font-bold text-2xl mr-3">${index + 1}</span>
+                                <h4 class="text-xl font-bold text-stone-800">${p.name}</h4>
+                            </div>
+                            <p class="text-stone-600">${p.tagline}</p>
+                        </div>
+                    `;
+                    principlesGrid.innerHTML += gridCard;
+                });
             }
 
             function renderPrincipleDetail(principleId) {
@@ -741,9 +787,9 @@
                 if (principleData.practice) {
                     practiceHtml = `
                         <div class="mt-8 pt-6 border-t border-stone-200">
-                            <h3 class="text-xl font-bold text-amber-600 mb-2">${principleData.practice.title}</h3>
+                            <h3 class="text-xl font-bold text-amber-500 mb-2">${principleData.practice.title}</h3>
                             <p class="text-stone-600 mb-4">${principleData.practice.description}</p>
-                            ${principleData.practice.buttonText ? `<button class="action-button bg-amber-400 hover:bg-amber-500 text-stone-800 font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}" data-principle="${principleId}">${principleData.practice.buttonText}</button>` : ''}
+                            ${principleData.practice.buttonText ? `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${principleData.practice.action}" data-principle="${principleId}">${principleData.practice.buttonText}</button>` : ''}
                             ${principleData.practice.form ? principleData.practice.form : ''}
                         </div>
                     `;
@@ -830,9 +876,20 @@
                 const attributes = ["Unwavering Courage", "Self-Control", "A Keen Sense of Justice", "Definiteness of Decision", "Definiteness of Plans", "Habit of Doing More Than Paid For", "A Pleasing Personality", "Sympathy and Understanding", "Mastery of Detail", "Willingness to Assume Full Responsibility", "Cooperation"];
                 let html = '';
                 attributes.forEach(attr => {
-                    html += `<div><label class="block text-sm font-medium text-stone-700">${attr}:</label><input type="range" min="1" max="10" value="5" class="w-full mt-1"></div>`;
+                    html += `
+                    <div class="flex items-center justify-between">
+                        <label class="block text-sm font-medium text-stone-700">${attr}:</label>
+                        <span class="font-bold text-purple-600 text-sm">5</span>
+                    </div>
+                    <input type="range" min="1" max="10" value="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    `;
                 });
                 container.innerHTML = html;
+                container.querySelectorAll('input[type="range"]').forEach(slider => {
+                    slider.addEventListener('input', (e) => {
+                        e.target.previousElementSibling.querySelector('span').textContent = e.target.value;
+                    });
+                });
             }
 
             function renderActionPlan() {
@@ -843,10 +900,10 @@
                     planHtml = '<ul class="space-y-3">';
                     userData.actionPlan.forEach((task, index) => {
                          planHtml += `
-                         <li class="flex items-center task-item p-2 rounded-md ${task.completed ? 'completed bg-stone-100' : 'bg-white'}" data-task-index="${index}">
+                         <li class="flex items-center task-item p-3 rounded-md ${task.completed ? 'completed bg-stone-100' : 'bg-white shadow-sm'}" data-task-index="${index}">
                             <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" ${task.completed ? 'checked' : ''}>
                             <span class="ml-3 text-stone-800 flex-grow">${task.text}</span>
-                            <button class="delete-task-btn text-gray-400 hover:text-red-500 text-lg">&times;</button>
+                            <button class="delete-task-btn text-gray-400 hover:text-red-500 text-lg px-2">&times;</button>
                         </li>`;
                     });
                     planHtml += '</ul>';
@@ -1001,21 +1058,10 @@
             
             // --- App Initialization ---
             function initStaticContent() {
-                const principlesGrid = document.getElementById('principles-grid');
+                
                 const principlesSidebar = document.getElementById('principles-sidebar');
                 
                 appData.principles.forEach((p, index) => {
-                    const gridCard = `
-                        <div class="nav-button bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer" data-target="principles-${p.id}">
-                            <div class="flex items-center mb-2">
-                                <span class="text-amber-500 font-bold text-2xl mr-3">${index + 1}</span>
-                                <h4 class="text-xl font-bold text-stone-800">${p.name}</h4>
-                            </div>
-                            <p class="text-stone-600">${p.tagline}</p>
-                        </div>
-                    `;
-                    principlesGrid.innerHTML += gridCard;
-                    
                     const sidebarLink = `<a href="#" class="sidebar-link nav-button block px-4 py-2 text-stone-700 rounded-md hover:bg-amber-300" data-target="principles-${p.id}">${index + 1}. ${p.name}</a>`;
                     principlesSidebar.innerHTML += sidebarLink;
                 });
