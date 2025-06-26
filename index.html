@@ -28,6 +28,16 @@
         .content-section.active {
             display: block;
         }
+        .sidebar-link.active {
+            background-color: #D6A354;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .sidebar-link.locked {
+            color: #a8a29e;
+            cursor: not-allowed;
+            background-color: #f5f5f4;
+        }
         .modal-backdrop {
             display: none;
             position: fixed;
@@ -59,6 +69,40 @@
             background-color: #FDFBF7;
             padding: 1rem;
             font-style: italic;
+        }
+        .task-item.completed span {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+        .principle-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .principle-card.locked {
+            filter: grayscale(80%);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .principle-card .completion-check {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #16a34a;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+         .principle-card.completed .completion-check {
+            opacity: 1;
+            transform: scale(1);
         }
         .nav-link.active {
             background-color: #D6A354;
@@ -122,7 +166,6 @@
                     <p class="text-lg text-stone-600 max-w-3xl mx-auto mb-6">Welcome to the interactive workshop for Napoleon Hill's timeless classic, *Think and Grow Rich*. This is not just a book to be read; it's a philosophy to be lived. This digital experience is designed to help you move beyond passive reading into active practice. Here, you will find tools and exercises to help you define your desires, build unshakeable faith, and create actionable plans to transform your dreams into reality.</p>
                 </div>
             </div>
-
              <div id="journey-view" class="content-section">
                 <!-- Journey Slider content will be rendered here -->
             </div>
@@ -131,6 +174,7 @@
 
     <div id="desire-modal-backdrop" class="modal-backdrop"></div>
     <div id="desire-modal" class="modal bg-white rounded-lg shadow-2xl p-8 max-w-lg w-full">
+        <!-- Desire Form Modal -->
         <h3 class="text-2xl font-bold mb-4">The Six Steps to Riches</h3>
         <p class="text-sm text-stone-600 mb-6">Follow this formula to transmute your desire for riches into its financial equivalent. Be specific and be bold.</p>
         <form id="desire-form">
@@ -181,16 +225,6 @@
                     { id: 'desire', name: 'Desire', tagline: 'The Turning Point of All Achievement' },
                     { id: 'faith', name: 'Faith', tagline: 'Visualizing and Believing in Attainment' },
                     { id: 'auto-suggestion', name: 'Auto-Suggestion', tagline: 'Influencing the Subconscious Mind' },
-                    { id: 'specialized-knowledge', name: 'Specialized Knowledge', tagline: 'Personal Experiences or Observations' },
-                    { id: 'imagination', name: 'Imagination', tagline: 'The Workshop of the Mind' },
-                    { id: 'organized-planning', name: 'Organized Planning', tagline: 'Crystallization of Desire into Action' },
-                    { id: 'decision', name: 'Decision', tagline: 'The Mastery of Procrastination' },
-                    { id: 'persistence', name: 'Persistence', tagline: 'The Sustained Effort to Induce Faith' },
-                    { id: 'master-mind', name: 'Power of the Master Mind', tagline: 'The Driving Force' },
-                    { id: 'sex-transmutation', name: 'Sex Transmutation', tagline: 'The Mystery of Converting Energy' },
-                    { id: 'subconscious-mind', name: 'The Subconscious Mind', tagline: 'The Connecting Link' },
-                    { id: 'brain', name: 'The Brain', tagline: 'A Broadcasting and Receiving Station' },
-                    { id: 'sixth-sense', name: 'The Sixth Sense', tagline: 'The Door to the Temple of Wisdom' }
                 ],
                 content: [
                     {
@@ -232,7 +266,22 @@
                             `
                         }
                     },
-                    // ... other principles (shortened for brevity)
+                    {
+                        id: 'auto-suggestion',
+                        title: 'Auto-Suggestion: Influencing the Subconscious Mind',
+                        summary: `Auto-suggestion is the control panel to your subconscious mind. It's the agency of communication between the conscious mind and the subconscious. Your subconscious mind is like a fertile garden; it will grow whatever seeds you plant, whether they are seeds of success or weeds of failure. Crucially, the subconscious only acts on thoughts that are mixed with emotion or feeling. Plain words have no effect. This is why you must read your written desire statement aloud daily, with feeling and emotion, seeing and feeling yourself already in possession of your goal. <blockquote>"Your subconscious mind recognizes and acts only upon thoughts which have been well-mixed with emotion or feeling."</blockquote>`,
+                         practice: {
+                            title: "Practice: The Daily Ritual",
+                            description: "This is the most critical habit. Reading your written statement aloud is the core of auto-suggestion. Confirm below that you have read it with emotion to master this principle.",
+                            form: `
+                                <div id="ritual-practice-statement" class="bg-stone-100 p-6 rounded-lg text-lg leading-relaxed border mb-4"></div>
+                                <div class="p-4 bg-amber-400/20 text-amber-800 rounded-lg text-center font-serif">
+                                    <p class="font-bold text-lg">"As you read, see and feel and believe yourself already in possession of the money."</p>
+                                </div>
+                                <button class="action-button mt-6 w-full px-6 py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600" data-action="saveAutoSuggestion">I Have Completed My Reading</button>
+                            `
+                        }
+                    },
                 ]
             };
 
@@ -331,8 +380,6 @@
                     } else {
                         userData = {
                             desireData: null,
-                            faithFormula: '',
-                            actionPlan: [],
                             completedPrinciples: [],
                         };
                     }
@@ -451,6 +498,19 @@
                     </div>
                 </div>`;
                 
+                if (principle.id === 'auto-suggestion') {
+                    const ritualStatementDiv = document.getElementById('ritual-practice-statement');
+                    if (ritualStatementDiv) {
+                         const desireDataSource = userData?.desireData || (userData?.desireStatement ? { plan: userData.desireStatement } : null);
+                        if (desireDataSource) {
+                            ritualStatementDiv.innerHTML = `<p class="italic">"${desireDataSource.amount ? `By ${desireDataSource.date}, I will have ${desireDataSource.amount}...` : desireDataSource.plan}"</p>`;
+                        } else {
+                            ritualStatementDiv.innerHTML = `<p class="italic text-center">Your Definite Chief Aim will appear here once you complete Step 1.</p>`;
+                        }
+                    }
+                }
+                
+
                 document.getElementById('prev-step-btn')?.addEventListener('click', () => {
                     if(currentPrincipleIndex > 0) {
                         currentPrincipleIndex--;
@@ -473,6 +533,7 @@
                         const action = e.target.dataset.action;
                         if (action === 'openDesireModal') openDesireModal();
                         if (action === 'saveFaith') handleFaithCommitment();
+                        if (action === 'saveAutoSuggestion') handleAutoSuggestionCommitment();
                     });
                 }
             }
@@ -483,8 +544,6 @@
                 }
                 if (!userData.completedPrinciples.includes(principleId)) {
                     userData.completedPrinciples.push(principleId);
-                    await saveUserData({ completedPrinciples: userData.completedPrinciples });
-                    currentPrincipleIndex = userData.completedPrinciples.length;
                 }
             }
             
@@ -523,8 +582,9 @@
                 }
                 
                 await markPrincipleComplete('desire');
-                await saveUserData({ desireData: desireData });
+                await saveUserData({ desireData: desireData, completedPrinciples: userData.completedPrinciples });
                 
+                currentPrincipleIndex = userData.completedPrinciples.length;
                 renderJourneyView(currentPrincipleIndex);
                 closeDesireModal();
                 showNotification('Your Desire Statement has been saved!');
@@ -532,9 +592,20 @@
             
             async function handleFaithCommitment() {
                 await markPrincipleComplete('faith');
+                await saveUserData({ completedPrinciples: userData.completedPrinciples });
+                currentPrincipleIndex = userData.completedPrinciples.length;
                 renderJourneyView(currentPrincipleIndex);
                 showNotification('Commitment saved! You are ready for the next principle.');
             }
+
+            async function handleAutoSuggestionCommitment() {
+                await markPrincipleComplete('auto-suggestion');
+                await saveUserData({ completedPrinciples: userData.completedPrinciples });
+                currentPrincipleIndex = userData.completedPrinciples.length;
+                renderJourneyView(currentPrincipleIndex);
+                showNotification('Auto-Suggestion mastered! You are ready for the next principle.');
+            }
+
 
             function showNotification(message) {
                 const modal = document.getElementById('notification-modal');
@@ -574,6 +645,7 @@
                         const action = actionButton.dataset.action;
                         if (action === 'openDesireModal') openDesireModal();
                         if (action === 'saveFaith') handleFaithCommitment();
+                        if (action === 'saveAutoSuggestion') handleAutoSuggestionCommitment();
                     }
                 });
                 
