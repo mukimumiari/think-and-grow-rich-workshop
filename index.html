@@ -28,16 +28,6 @@
         .content-section.active {
             display: block;
         }
-        .sidebar-link.active {
-            background-color: #D6A354;
-            color: #ffffff;
-            font-weight: 600;
-        }
-        .sidebar-link.locked {
-            color: #a8a29e;
-            cursor: not-allowed;
-            background-color: #f5f5f4;
-        }
         .modal-backdrop {
             display: none;
             position: fixed;
@@ -69,40 +59,6 @@
             background-color: #FDFBF7;
             padding: 1rem;
             font-style: italic;
-        }
-        .task-item.completed span {
-            text-decoration: line-through;
-            color: #9ca3af;
-        }
-        .principle-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .principle-card.locked {
-            filter: grayscale(80%);
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .principle-card .completion-check {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: #16a34a;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transform: scale(0.5);
-            transition: opacity 0.3s, transform 0.3s;
-        }
-         .principle-card.completed .completion-check {
-            opacity: 1;
-            transform: scale(1);
         }
         .nav-link.active {
             background-color: #D6A354;
@@ -161,8 +117,7 @@
 
         <main class="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
             <div id="home" class="content-section">
-                <!-- Home content remains, shown when logged out -->
-                 <div class="text-center bg-white p-8 rounded-lg shadow-lg">
+                <div class="text-center bg-white p-8 rounded-lg shadow-lg">
                     <h2 class="text-4xl font-bold text-stone-800 mb-4">"Whatever the Mind Can Conceive and Believe, It Can Achieve."</h2>
                     <p class="text-lg text-stone-600 max-w-3xl mx-auto mb-6">Welcome to the interactive workshop for Napoleon Hill's timeless classic, *Think and Grow Rich*. This is not just a book to be read; it's a philosophy to be lived. This digital experience is designed to help you move beyond passive reading into active practice. Here, you will find tools and exercises to help you define your desires, build unshakeable faith, and create actionable plans to transform your dreams into reality.</p>
                 </div>
@@ -176,7 +131,6 @@
 
     <div id="desire-modal-backdrop" class="modal-backdrop"></div>
     <div id="desire-modal" class="modal bg-white rounded-lg shadow-2xl p-8 max-w-lg w-full">
-        <!-- Desire Form Modal -->
         <h3 class="text-2xl font-bold mb-4">The Six Steps to Riches</h3>
         <p class="text-sm text-stone-600 mb-6">Follow this formula to transmute your desire for riches into its financial equivalent. Be specific and be bold.</p>
         <form id="desire-form">
@@ -203,16 +157,9 @@
         </form>
     </div>
     
-    <div id="ritual-modal" class="modal bg-gradient-to-br from-purple-700 to-blue-600 rounded-lg shadow-2xl p-8 max-w-2xl w-full text-white">
-        <h3 class="text-3xl font-bold mb-4 text-center">Your Daily Ritual</h3>
-        <p class="text-center mb-6">Read your statement aloud to impress it upon your subconscious mind.</p>
-        <div id="ritual-statement" class="bg-white/10 p-6 rounded-lg text-lg leading-relaxed"></div>
-        <div class="mt-4 p-4 bg-amber-400/20 text-amber-100 rounded-lg text-center">
-            <p class="font-bold">"As you read, see and feel and believe yourself already in possession of the money."</p>
-        </div>
-        <div class="flex justify-center mt-6">
-            <button id="complete-ritual-btn" class="px-6 py-3 bg-amber-400 text-stone-800 font-bold rounded-lg hover:bg-amber-500">I have completed my reading</button>
-        </div>
+    <div id="notification-modal" class="modal bg-white rounded-lg shadow-2xl p-8 max-w-md w-full text-center">
+        <div id="notification-content"></div>
+        <button id="close-notification-btn" class="mt-6 px-6 py-2 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600">OK</button>
     </div>
 
 
@@ -228,7 +175,6 @@
             let db, auth, userId, userData;
             let isAuthReady = false;
             let currentPrincipleIndex = 0;
-            let ritualCheckerInterval = null;
 
             const appData = {
                  principles: [
@@ -286,35 +232,6 @@
                             `
                         }
                     },
-                    {
-                        id: 'auto-suggestion',
-                        title: 'Auto-Suggestion: Influencing the Subconscious Mind',
-                        summary: `Auto-suggestion is the control panel to your subconscious mind. It's the agency of communication between the conscious mind and the subconscious. Your subconscious mind is like a fertile garden; it will grow whatever seeds you plant, whether they are seeds of success or weeds of failure. Crucially, the subconscious only acts on thoughts that are mixed with emotion or feeling. Plain words have no effect. This is why you must read your written desire statement aloud daily, with feeling and emotion, seeing and feeling yourself already in possession of your goal. <blockquote>"Your subconscious mind recognizes and acts only upon thoughts which have been well-mixed with emotion or feeling."</blockquote>`,
-                         practice: {
-                            title: "Practice: The Daily Ritual",
-                            description: "This is the most critical habit. Read your written statement aloud twice daily. As you do, follow the key instruction below. This programs your subconscious mind for success.",
-                            form: `
-                                <div id="ritual-practice-statement" class="bg-white/10 p-6 rounded-lg text-lg leading-relaxed border mb-4"></div>
-                                <div class="p-4 bg-amber-400/20 text-amber-800 rounded-lg text-center font-serif">
-                                    <p class="font-bold text-lg">"As you read, see and feel and believe yourself already in possession of the money."</p>
-                                </div>
-                                <div class="mt-6 pt-4 border-t">
-                                    <h4 class="font-bold text-lg mb-2">Set Your Daily Reminder Times</h4>
-                                     <div class="flex gap-4 items-center">
-                                        <div class="flex-1">
-                                            <label for="morning-ritual" class="block text-sm font-medium text-stone-700">Morning Ritual</label>
-                                            <input type="time" id="morning-ritual" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm">
-                                        </div>
-                                        <div class="flex-1">
-                                            <label for="evening-ritual" class="block text-sm font-medium text-stone-700">Evening Ritual</label>
-                                            <input type="time" id="evening-ritual" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm">
-                                        </div>
-                                    </div>
-                                    <button class="action-button mt-4 w-full px-6 py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600" data-action="saveRitual">Save Ritual Times</button>
-                                </div>
-                            `
-                        }
-                    },
                     // ... other principles (shortened for brevity)
                 ]
             };
@@ -357,7 +274,6 @@
                             isAuthReady = false;
                             userId = null;
                             userData = null;
-                            if (ritualCheckerInterval) clearInterval(ritualCheckerInterval);
                             document.getElementById('sign-out-btn').classList.add('hidden');
                             loginOverlay.style.display = 'flex';
                             showStatus("Not Connected", true);
@@ -418,15 +334,10 @@
                             faithFormula: '',
                             actionPlan: [],
                             completedPrinciples: [],
-                            ritualTimes: { morning: null, evening: null },
-                            lastRitual: null,
-                            knowledgePlan: null,
-                            imaginationPlan: null
                         };
                     }
                     currentPrincipleIndex = userData.completedPrinciples?.length || 0;
                     renderJourneyView(currentPrincipleIndex);
-                    startRitualChecker();
                 } catch (error) {
                     console.error("Error loading user data:", error);
                     showStatus("Load Failed", true);
@@ -435,7 +346,7 @@
             
              async function saveUserData(dataToSave) {
                 if (!isAuthReady || !db || !userId) {
-                    alert("Not connected to the database. Please sign in and try again.");
+                    showNotification("Not connected to the database. Please sign in and try again.");
                     return;
                 }
                 showStatus("Saving...", false);
@@ -508,8 +419,6 @@
 
                 if (content.practice) {
                     let practiceContent = '';
-                    const isCompleted = userData?.completedPrinciples?.includes(principle.id);
-
                      if (content.practice.buttonText) {
                          const buttonText = (principle.id === 'desire' && (userData?.desireData || userData?.desireStatement)) ? "Modify My Desire" : content.practice.buttonText;
                          practiceContent = `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${content.practice.action}" data-principle-id="${principle.id}">${buttonText}</button>`;
@@ -542,33 +451,6 @@
                     </div>
                 </div>`;
                 
-                if (principle.id === 'faith') {
-                    const faithTextarea = document.getElementById('faith-formula');
-                    if(faithTextarea) { faithTextarea.value = userData.faithFormula || ''; }
-                }
-                
-                if (principle.id === 'auto-suggestion') {
-                    const ritualStatementDiv = document.getElementById('ritual-practice-statement');
-                    if (ritualStatementDiv) {
-                        const desireDataSource = userData.desireData || (userData.desireStatement ? { plan: userData.desireStatement } : null);
-                        if (desireDataSource) {
-                            ritualStatementDiv.innerHTML = `<p class="italic">"${desireDataSource.amount ? `By ${desireDataSource.date}, I will have ${desireDataSource.amount}...` : desireDataSource.plan}"</p>`;
-                        } else {
-                            ritualStatementDiv.innerHTML = `<p class="italic text-center">Your Definite Chief Aim will appear here once you complete Step 1.</p>`;
-                        }
-                    }
-                }
-                
-                if(principle.id === 'specialized-knowledge') {
-                    renderKnowledgeSources();
-                }
-                if(principle.id === 'imagination') {
-                    const { synthetic, creative, visualization } = userData.imaginationPlan || {};
-                    document.getElementById('imagination-synthetic').value = synthetic || '';
-                    document.getElementById('imagination-creative').value = creative || '';
-                    document.getElementById('imagination-visualization').value = visualization || '';
-                }
-
                 document.getElementById('prev-step-btn')?.addEventListener('click', () => {
                     if(currentPrincipleIndex > 0) {
                         currentPrincipleIndex--;
@@ -591,9 +473,6 @@
                         const action = e.target.dataset.action;
                         if (action === 'openDesireModal') openDesireModal();
                         if (action === 'saveFaith') handleFaithCommitment();
-                        if (action === 'saveRitual') handleSaveRitual();
-                        if (action === 'saveKnowledgePlan') handleSaveKnowledgePlan();
-                        if (action === 'saveImaginationPlan') handleSaveImaginationPlan();
                     });
                 }
             }
@@ -604,6 +483,8 @@
                 }
                 if (!userData.completedPrinciples.includes(principleId)) {
                     userData.completedPrinciples.push(principleId);
+                    await saveUserData({ completedPrinciples: userData.completedPrinciples });
+                    currentPrincipleIndex = userData.completedPrinciples.length;
                 }
             }
             
@@ -637,140 +518,47 @@
                     plan: document.getElementById('desire-plan').value,
                 };
                 if (!desireData.amount || !desireData.give || !desireData.date || !desireData.plan) {
-                    alert('Please fill out all fields to create your statement.');
+                    showNotification('Please fill out all fields to create your statement.');
                     return;
                 }
                 
                 await markPrincipleComplete('desire');
-                await saveUserData({ desireData: desireData, desireStatement: null, completedPrinciples: userData.completedPrinciples });
+                await saveUserData({ desireData: desireData });
                 
                 renderJourneyView(currentPrincipleIndex);
                 closeDesireModal();
-                alert('Your Desire Statement has been saved!');
+                showNotification('Your Desire Statement has been saved!');
             }
             
             async function handleFaithCommitment() {
                 await markPrincipleComplete('faith');
-                await saveUserData({ faithFormula: "User has committed to the Self-Confidence Formula.", completedPrinciples: userData.completedPrinciples });
                 renderJourneyView(currentPrincipleIndex);
-                alert('Commitment saved! You are ready for the next principle.');
-            }
-            
-            function handleSaveRitual() {
-                const morning = document.getElementById('morning-ritual').value;
-                const evening = document.getElementById('evening-ritual').value;
-                if(!morning || !evening) {
-                    alert("Please set both a morning and evening time for your ritual.");
-                    return;
-                }
-                markPrincipleComplete('auto-suggestion');
-                saveUserData({ ritualTimes: { morning, evening }, lastRitual: null });
-                alert('Ritual times saved!');
-                renderJourneyView(currentPrincipleIndex);
-                startRitualChecker();
+                showNotification('Commitment saved! You are ready for the next principle.');
             }
 
-            function startRitualChecker() {
-                if (ritualCheckerInterval) clearInterval(ritualCheckerInterval);
-
-                ritualCheckerInterval = setInterval(() => {
-                    const now = new Date();
-                    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-                    
-                    const ritualTimes = userData?.ritualTimes;
-                    if (!ritualTimes || (!ritualTimes.morning && !ritualTimes.evening)) return;
-
-                    const today = new Date().toISOString().split('T')[0];
-                    if(userData.lastRitual === today) return;
-
-                    if (currentTime === ritualTimes.morning || currentTime === ritualTimes.evening) {
-                        if (userData.desireData || userData.desireStatement) {
-                            showRitualModal();
-                        }
-                    }
-                }, 60000); // Check every minute
-            }
-            
-            function showRitualModal() {
-                 const statementDiv = document.getElementById('ritual-statement');
-                 const desireDataSource = userData.desireData || (userData.desireStatement ? { plan: userData.desireStatement } : null);
-                 if(desireDataSource.amount) {
-                      statementDiv.innerHTML = `<p>By ${desireDataSource.date}, I will have ${desireDataSource.amount}. In return I will ${desireDataSource.give}. My plan is: ${desireDataSource.plan}</p>`;
-                 } else {
-                     statementDiv.innerHTML = desireDataSource.plan;
-                 }
+            function showNotification(message) {
+                const modal = document.getElementById('notification-modal');
+                const content = document.getElementById('notification-content');
+                const backdrop = document.getElementById('desire-modal-backdrop');
                 
-                document.getElementById('desire-modal-backdrop').style.display = 'block';
-                document.getElementById('ritual-modal').style.display = 'block';
+                content.textContent = message;
+                backdrop.style.display = 'block';
+                modal.style.display = 'block';
             }
-            
-            function completeRitual() {
-                const today = new Date().toISOString().split('T')[0];
-                saveUserData({ lastRitual: today });
+
+            function closeNotification() {
+                document.getElementById('notification-modal').style.display = 'none';
                 document.getElementById('desire-modal-backdrop').style.display = 'none';
-                document.getElementById('ritual-modal').style.display = 'none';
             }
             
-            function renderKnowledgeSources() {
-                const container = document.getElementById('knowledge-sources');
-                if(!container) return;
-                const sources = ["Own Experience & Education", "Master Mind Alliance", "Colleges & Universities", "Public Libraries", "Special Training Courses"];
-                let html = '';
-                sources.forEach(source => {
-                    html += `<label class="flex items-center space-x-2"><input type="checkbox" class="rounded"><span>${source}</span></label>`;
-                });
-                container.innerHTML = html;
-            }
-
-            async function handleSaveKnowledgePlan() {
-                const needed = document.getElementById('knowledge-needed').value;
-                const plan = document.getElementById('knowledge-plan').value;
-
-                if(!needed || !plan) {
-                    alert("Please fill out what knowledge you need and your plan to acquire it.");
-                    return;
-                }
-                const sources = [];
-                document.querySelectorAll('#knowledge-sources input:checked').forEach(checkbox => {
-                    sources.push(checkbox.nextElementSibling.textContent);
-                });
-
-                const knowledgePlan = { needed, sources, plan };
-                await markPrincipleComplete('specialized-knowledge');
-                await saveUserData({ knowledgePlan, completedPrinciples: userData.completedPrinciples });
-                renderJourneyView(currentPrincipleIndex);
-                alert("Your Knowledge Plan has been saved!");
-            }
-            
-            async function handleSaveImaginationPlan() {
-                const imaginationPlan = {
-                    synthetic: document.getElementById('imagination-synthetic').value,
-                    creative: document.getElementById('imagination-creative').value,
-                    visualization: document.getElementById('imagination-visualization').value,
-                };
-
-                if(!imaginationPlan.synthetic || !imaginationPlan.creative || !imaginationPlan.visualization) {
-                    alert("Please fill out all parts of the Imagination Workshop.");
-                    return;
-                }
-
-                await markPrincipleComplete('imagination');
-                await saveUserData({ imaginationPlan, completedPrinciples: userData.completedPrinciples });
-                renderJourneyView(currentPrincipleIndex);
-                alert("Your Imagination Blueprint has been saved!");
-            }
-
             
             // --- App Initialization ---
             function initStaticContent() {
-                document.getElementById('desire-form').addEventListener('submit', handleDesireFormSubmit);
-                document.getElementById('close-desire-modal').addEventListener('click', closeDesireModal);
-                document.getElementById('complete-ritual-btn').addEventListener('click', completeRitual);
                 googleLoginBtn.addEventListener('click', handleGoogleLogin);
                 document.getElementById('sign-out-btn').addEventListener('click', handleSignOut);
-                mobileMenuButton.addEventListener('click', () => {
-                    mobileMenu.classList.toggle('hidden');
-                });
+                document.getElementById('desire-form').addEventListener('submit', handleDesireFormSubmit);
+                document.getElementById('close-desire-modal').addEventListener('click', closeDesireModal);
+                document.getElementById('close-notification-btn').addEventListener('click', closeNotification);
 
                  mainContentArea.addEventListener('click', e => {
                     const navButton = e.target.closest('.nav-button');
@@ -786,10 +574,11 @@
                         const action = actionButton.dataset.action;
                         if (action === 'openDesireModal') openDesireModal();
                         if (action === 'saveFaith') handleFaithCommitment();
-                        if (action === 'saveRitual') handleSaveRitual();
-                        if (action === 'saveKnowledgePlan') handleSaveKnowledgePlan();
-                        if (action === 'saveImaginationPlan') handleSaveImaginationPlan();
                     }
+                });
+                
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
                 });
             }
             
