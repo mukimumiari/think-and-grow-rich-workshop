@@ -310,62 +310,7 @@
                                             <input type="time" id="evening-ritual" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm">
                                         </div>
                                     </div>
-                                    <button class="action-button mt-4 w-full px-6 py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600" data-action="saveRitual">Save Ritual Times & Complete Step</button>
-                                </div>
-                            `
-                        }
-                    },
-                    {
-                        id: 'specialized-knowledge',
-                        title: 'Specialized Knowledge: Personal Experiences or Observations',
-                        summary: `General knowledge, no matter how great in quantity or variety, is of little use in accumulating money. Fortunes are created through specialized knowledge. This doesn't mean you must possess this knowledge yourself. Henry Ford was famously 'ignorant' of many technical details but surrounded himself with a Master Mind group who had the knowledge he needed. When sued for being an "ignorant pacifist," he challenged his critics by stating, "I have a row of electric push-buttons on my desk, and by pushing the right button, I can summon to my aid men who can answer any question I desire to ask concerning the business to which I am devoting most of my efforts. Now, will you kindly tell me, why I should clutter up my mind with general knowledge, for the purpose of being able to answer questions, when I have men around me who can supply any knowledge I require?" <blockquote>"Successful men, in all callings, never stop acquiring specialized knowledge related to their major purpose, business, or profession."</blockquote>`,
-                        practice: {
-                            title: "Practice: Knowledge Acquisition Plan",
-                            description: "Knowledge is only potential power. It becomes power only when, and if, it is organized into definite plans of action and directed to a definite end. Follow the steps below.",
-                             form: `
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="block font-medium text-stone-700">1. What knowledge do I need for my Definite Chief Aim?</label>
-                                        <textarea id="knowledge-needed" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="3" placeholder="e.g., Expert sales techniques, specific programming languages, digital marketing strategies..."></textarea>
-                                    </div>
-                                    <div>
-                                        <label class="block font-medium text-stone-700">2. Where can I acquire this knowledge?</label>
-                                        <div id="knowledge-sources" class="mt-2 grid grid-cols-2 gap-2"></div>
-                                    </div>
-                                    <div>
-                                        <label class="block font-medium text-stone-700">3. How will I organize and use this knowledge?</label>
-                                        <textarea id="knowledge-plan" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="4" placeholder="e.g., 'I will enroll in the online course by July 1st. I will dedicate 1 hour each evening to study. I will apply my new sales technique on at least 3 calls per day...'"></textarea>
-                                    </div>
-                                    <button class="action-button w-full px-6 py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600" data-action="saveKnowledgePlan">Save My Knowledge Plan</button>
-                                </div>
-                            `
-                        }
-                    },
-                    {
-                        id: 'imagination',
-                        title: 'Imagination: The Workshop of the Mind',
-                        summary: `The imagination is the workshop where all plans are created. Hill identifies two forms: <strong>Synthetic Imagination</strong>, which rearranges old concepts, ideas, or plans into new combinations, and <strong>Creative Imagination</strong>, which connects with Infinite Intelligence and is the source of "hunches" and inspiration. The story of Coca-Cola is a testament to imagination. The old country doctor who created the formula sold it for a pittance. It was Asa Candler's IDEA to mass-market it, an idea born of imagination, that became the "mysterious ingredient" that transformed a simple formula into a global empire. <blockquote>"Ideas are the beginning points of all fortunes. Ideas are products of the imagination."</blockquote>`,
-                        practice: {
-                            title: "Practice: The Imagination Workshop",
-                            description: "Exercise both forms of your imagination. Use Synthetic Imagination to create new combinations from old ideas, and Creative Imagination to tune in to hunches and inspiration.",
-                            form: `
-                                <div class="space-y-6">
-                                    <div>
-                                        <label class="block font-medium text-stone-700 mb-1">Part 1: Synthetic Imagination (The Plan)</label>
-                                        <p class="text-sm text-stone-500 mb-2">How can you rearrange existing ideas or knowledge to form a practical plan to achieve your Definite Chief Aim?</p>
-                                        <textarea id="imagination-synthetic" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="4" placeholder="e.g., I will combine my sales skills with my new knowledge of social media marketing to create a unique outreach program..."></textarea>
-                                    </div>
-                                    <div>
-                                        <label class="block font-medium text-stone-700 mb-1">Part 2: Creative Imagination (The Hunch)</label>
-                                        <p class="text-sm text-stone-500 mb-2">What new, 'impossible' idea has come to you? What 'hunch' or inspiration have you received related to your goal?</p>
-                                        <textarea id="imagination-creative" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="4" placeholder="e.g., A sudden idea for a new product, an intuitive feeling to contact a specific person..."></textarea>
-                                    </div>
-                                     <div>
-                                        <label class="block font-medium text-stone-700 mb-1">Part 3: Visualization (The Feeling)</label>
-                                        <p class="text-sm text-stone-500 mb-2">Describe in vivid, emotional detail the feeling of having already achieved your goal.</p>
-                                        <textarea id="imagination-visualization" class="mt-1 block w-full rounded-md border-stone-300 shadow-sm" rows="4" placeholder="e.g., I feel the immense satisfaction and pride of seeing my bank account with the desired amount. I hear the congratulations of my peers..."></textarea>
-                                    </div>
-                                    <button class="action-button w-full px-6 py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600" data-action="saveImaginationPlan">Save My Imagination Blueprint</button>
+                                    <button class="action-button mt-4 w-full px-6 py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600" data-action="saveRitual">Save Ritual Times</button>
                                 </div>
                             `
                         }
@@ -563,7 +508,9 @@
 
                 if (content.practice) {
                     let practiceContent = '';
-                    if (content.practice.buttonText) {
+                    const isCompleted = userData?.completedPrinciples?.includes(principle.id);
+
+                     if (content.practice.buttonText) {
                          const buttonText = (principle.id === 'desire' && (userData?.desireData || userData?.desireStatement)) ? "Modify My Desire" : content.practice.buttonText;
                          practiceContent = `<button class="action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300" data-action="${content.practice.action}" data-principle-id="${principle.id}">${buttonText}</button>`;
                     } else {
